@@ -1,0 +1,133 @@
+local addonName, addon = ...
+
+local Colors = addon.Colors
+local BUTTON_SIZE = 30
+local BADGE_SIZE = 16
+
+local button
+local badge
+
+local BACKDROP_BUTTON = {
+    bgFile = "Interface\\Buttons\\WHITE8x8",
+    edgeFile = "Interface\\Buttons\\WHITE8x8",
+    edgeSize = 1,
+    insets = { left = 1, right = 1, top = 1, bottom = 1 },
+}
+
+local function CreateToggleButton()
+    button = CreateFrame("Button", "BNCToggleButton", UIParent, "BackdropTemplate")
+    button:SetSize(BUTTON_SIZE, BUTTON_SIZE)
+    button:SetBackdrop(BACKDROP_BUTTON)
+    button:SetBackdropColor(unpack(Colors.cardBg))
+    button:SetBackdropBorderColor(unpack(Colors.cardBorder))
+    button:SetFrameStrata("HIGH")
+    button:SetFrameLevel(100)
+    button:SetClampedToScreen(true)
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+    -- Bell icon
+    button.icon = button:CreateTexture(nil, "ARTWORK")
+    button.icon:SetSize(18, 18)
+    button.icon:SetPoint("CENTER", button, "CENTER", 0, 0)
+    button.icon:SetTexture("Interface\\Icons\\INV_Misc_Bell_01")
+    button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+    -- Badge
+    badge = CreateFrame("Frame", nil, button, "BackdropTemplate")
+    badge:SetSize(BADGE_SIZE, BADGE_SIZE)
+    badge:SetPoint("TOPRIGHT", button, "TOPRIGHT", 4, 4)
+    badge:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 },
+    })
+    badge:SetBackdropColor(unpack(Colors.badge))
+    badge:SetBackdropBorderColor(unpack(Colors.badge))
+    badge:SetFrameLevel(button:GetFrameLevel() + 2)
+    badge:EnableMouse(false)
+    badge:Hide()
+
+    badge.text = badge:CreateFontString(nil, "OVERLAY")
+    badge.text:SetFontObject(GameFontNormalSmall)
+    badge.text:SetTextColor(unpack(Colors.badgeText))
+    badge.text:SetPoint("CENTER", badge, "CENTER", 0, 0)
+
+    -- Left click toggles panel, right click clears all
+    button:SetScript("OnClick", function(self, btn)
+        if btn == "RightButton" then
+            addon.DismissAllToasts()
+            BNC:DismissAll()
+        else
+            addon.TogglePanel()
+        end
+    end)
+
+    -- Hover + Tooltip
+    button:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(unpack(Colors.cardHover))
+        GameTooltip:SetOwner(self, "ANCHOR_NONE")
+
+        local anchorData = addon.GetAnchorData(addon.db.position)
+        if anchorData.xDir > 0 then
+            GameTooltip:SetPoint("TOPLEFT", self, "TOPRIGHT", 4, 0)
+        else
+            GameTooltip:SetPoint("TOPRIGHT", self, "TOPLEFT", -4, 0)
+        end
+
+        GameTooltip:AddLine("BazNotificationCenter")
+        local count = BNC:GetUnreadCount()
+        if count > 0 then
+            GameTooltip:AddLine(count .. " notification" .. (count ~= 1 and "s" or ""), 0.8, 0.8, 0.8)
+        else
+            GameTooltip:AddLine("No notifications", 0.5, 0.5, 0.5)
+        end
+        GameTooltip:AddLine("Click to toggle panel", 0.5, 0.5, 0.5)
+        GameTooltip:AddLine("Right-click to clear all", 0.5, 0.5, 0.5)
+        GameTooltip:Show()
+    end)
+    button:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(unpack(Colors.cardBg))
+        GameTooltip:Hide()
+    end)
+end
+
+local function UpdateBadge()
+    if not badge then return end
+    local count = BNC:GetUnreadCount()
+    if count > 0 then
+        badge.text:SetText(count > 999 and "999+" or tostring(count))
+        -- Widen badge for larger numbers
+        local textWidth = badge.text:GetStringWidth()
+        badge:SetWidth(math.max(BADGE_SIZE, textWidth + 6))
+        badge:Show()
+    else
+        badge:Hide()
+    end
+end
+
+local function ReanchorButton()
+    if not button or not addon.db then return end
+    addon.AnchorToCorner(button, addon.db.position)
+end
+
+function addon.GetToggleButton()
+    return button
+end
+
+-- Event listeners
+addon.Events:Register("CORE_LOADED", function()
+    CreateToggleButton()
+    ReanchorButton()
+    UpdateBadge()
+end)
+
+addon.Events:Register("NOTIFICATION_ADDED", UpdateBadge)
+addon.Events:Register("NOTIFICATION_DISMISSED", UpdateBadge)
+addon.Events:Register("NOTIFICATIONS_CLEARED", UpdateBadge)
+addon.Events:Register("SETTING_CHANGED_position", ReanchorButton)
+addon.Events:Register("SETTING_CHANGED_scale", function(scale)
+    if button then
+        button:SetScale(scale or 1)
+    end
+end)

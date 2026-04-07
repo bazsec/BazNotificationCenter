@@ -1,0 +1,69 @@
+## Interface: 120001
+## Title: BazNotificationCenter
+## Notes: A modern, polished notification center for World of Warcraft.
+## Author: Baz4k
+## Version: 001
+## X-License: GPL v2
+## X-Curse-Project-ID: 1498445
+## Dependencies: BazCore
+## SavedVariables: BazNotificationCenterDB
+## IconTexture: Interface\Icons\INV_Misc_Bell_01
+## AddonCompartmentFunc: BNC_TogglePanel
+## Category: User Interface
+
+# Utils
+Utils\SafeCall.lua
+Utils\TimeFormat.lua
+Utils\Anchoring.lua
+
+# Core
+Core\Init.lua
+Core\Events.lua
+Core\Database.lua
+Core\SlashCommands.lua
+Core\BlizzardFrames.lua
+Core\DoNotDisturb.lua
+Utils\SafeString.lua
+
+# API
+API\ModuleRegistry.lua
+API\Notifications.lua
+API\ModuleHelpers.lua
+
+# UI
+UI\Colors.lua
+UI\Animations.lua
+UI\NotificationCard.lua
+UI\GroupHeader.lua
+UI\Toast.lua
+UI\PanelScroll.lua
+UI\Panel.lua
+UI\ToggleButton.lua
+
+# Options
+Options\SliderControl.lua
+Options\CheckboxControl.lua
+Options\CornerPicker.lua
+Options\OptionsPanel.lua
+
+# Modules
+Modules\Achievements.lua
+Modules\Auction.lua
+Modules\Calendar.lua
+Modules\Collections.lua
+Modules\Group.lua
+Modules\Instance.lua
+Modules\Inventory.lua
+Modules\Keystone.lua
+Modules\Loot.lua
+Modules\Mail.lua
+Modules\Professions.lua
+Modules\Quests.lua
+Modules\Rares.lua
+Modules\Reputation.lua
+Modules\Social.lua
+Modules\System.lua
+Modules\TalkingHead.lua
+Modules\Vault.lua
+Modules\XP.lua
+Modules\Zones.lua
