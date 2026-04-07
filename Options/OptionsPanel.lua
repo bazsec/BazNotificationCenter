@@ -17,9 +17,14 @@ local function CreateScrollableFrame(name)
     scrollFrame:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -26, 0)
 
     local content = CreateFrame("Frame", nil, scrollFrame)
-    content:SetWidth(540)
+    content:SetWidth(scrollFrame:GetWidth() or 580)
     content:SetHeight(1)
     scrollFrame:SetScrollChild(content)
+
+    -- Update content width when container resizes
+    container:SetScript("OnSizeChanged", function(self, w)
+        content:SetWidth(w - 26)
+    end)
 
     container.scrollFrame = scrollFrame
     container.content = content
@@ -55,7 +60,7 @@ end
 local function AddHeader(frame, yOffset, text)
     local fs = frame:CreateFontString(nil, "OVERLAY")
     fs:SetFontObject(GameFontNormal)
-    fs:SetTextColor(unpack(Colors.groupHeader))
+    fs:SetTextColor(1, 0.82, 0)
     fs:SetText(text)
     fs:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, yOffset)
     return fs, yOffset - 20
@@ -138,22 +143,6 @@ local function CreateMainPage()
         "See the BNC API documentation for full details.",
         GameFontHighlight, Colors.textPrimary, 500)
 
-    -- Baz Suite list
-    y = y - 8
-    _, y = AddHeader(frame, y, "BAZ SUITE")
-
-    local bazAddons = {}
-    for name, config in pairs(BazCore.addons) do
-        local ver = C_AddOns.GetAddOnMetadata(name, "Version") or "?"
-        table.insert(bazAddons, (config.title or name) .. " v" .. ver)
-    end
-    table.sort(bazAddons)
-    local bazText = "|cff3399ffBazCore|r v" .. BazCore.VERSION .. "\n"
-    for _, line in ipairs(bazAddons) do
-        bazText = bazText .. "|cffffffff" .. line .. "|r\n"
-    end
-    _, y = AddText(frame, y, bazText, GameFontHighlight, nil, 500)
-
     container:SetScript("OnShow", function()
         UpdateContentHeight(container)
     end)
@@ -165,102 +154,234 @@ end
 -- Settings Subcategory
 ---------------------------------------------------------------------------
 
+-- Two-column layout helper for BNC settings
+-- items = array of { widget, height, fullWidth (optional bool) }
+local COL_GAP = 16
+local COL_PAD = 16
+
+local PANEL_BACKDROP = {
+    bgFile = "Interface\\Buttons\\WHITE8X8",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    edgeSize = 8,
+    insets = { left = 2, right = 2, top = 2, bottom = 2 },
+}
+local PANEL_PAD = 10
+
+local function LayoutTwoColumn(frame, items, totalWidth)
+    local y = -8
+
+    -- Separate items into groups split by fullWidth items
+    local sections = {}
+    local currentPair = { left = {}, right = {} }
+    local col = 1
+
+    for _, item in ipairs(items) do
+        if item.fullWidth then
+            -- Flush current pair if it has items
+            if #currentPair.left > 0 or #currentPair.right > 0 then
+                table.insert(sections, { type = "pair", data = currentPair })
+                currentPair = { left = {}, right = {} }
+                col = 1
+            end
+            table.insert(sections, { type = "full", data = item })
+        else
+            if col == 1 then
+                table.insert(currentPair.left, item)
+                col = 2
+            else
+                table.insert(currentPair.right, item)
+                col = 1
+            end
+        end
+    end
+    -- Flush remaining
+    if #currentPair.left > 0 or #currentPair.right > 0 then
+        table.insert(sections, { type = "pair", data = currentPair })
+    end
+
+    -- Render sections
+    local panelWidth = math.floor((totalWidth - COL_PAD * 2 - COL_GAP) / 2)
+
+    local prevType = nil
+    for _, section in ipairs(sections) do
+        if section.type == "full" then
+            -- Extra gap before headers that follow a panel pair
+            if prevType == "pair" then
+                y = y - 8
+            end
+            section.data.widget:SetPoint("TOPLEFT", frame, "TOPLEFT", COL_PAD, y)
+            section.data.widget:Show()
+            y = y - section.data.height - 4
+        else
+            -- Calculate height for each column
+            local leftH = PANEL_PAD
+            for _, item in ipairs(section.data.left) do
+                leftH = leftH + item.height + 8
+            end
+            leftH = leftH + PANEL_PAD - 8
+
+            local rightH = PANEL_PAD
+            for _, item in ipairs(section.data.right) do
+                rightH = rightH + item.height + 8
+            end
+            rightH = rightH + PANEL_PAD - 8
+
+            local maxH = math.max(leftH, rightH)
+
+            -- Left panel
+            local leftPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+            leftPanel:SetSize(panelWidth, maxH)
+            leftPanel:SetPoint("TOPLEFT", frame, "TOPLEFT", COL_PAD, y)
+            leftPanel:SetBackdrop(PANEL_BACKDROP)
+            leftPanel:SetBackdropColor(0.04, 0.04, 0.06, 0.4)
+            leftPanel:SetBackdropBorderColor(0.25, 0.25, 0.3, 0.5)
+            leftPanel:Show()
+
+            local ly = -PANEL_PAD
+            for _, item in ipairs(section.data.left) do
+                item.widget:SetParent(leftPanel)
+                item.widget:SetPoint("TOPLEFT", leftPanel, "TOPLEFT", PANEL_PAD, ly)
+                item.widget:Show()
+                ly = ly - item.height - 8
+            end
+
+            -- Right panel
+            local rightPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+            rightPanel:SetSize(panelWidth, maxH)
+            rightPanel:SetPoint("TOPLEFT", frame, "TOPLEFT", COL_PAD + panelWidth + COL_GAP, y)
+            rightPanel:SetBackdrop(PANEL_BACKDROP)
+            rightPanel:SetBackdropColor(0.04, 0.04, 0.06, 0.4)
+            rightPanel:SetBackdropBorderColor(0.25, 0.25, 0.3, 0.5)
+            rightPanel:Show()
+
+            local ry = -PANEL_PAD
+            for _, item in ipairs(section.data.right) do
+                item.widget:SetParent(rightPanel)
+                item.widget:SetPoint("TOPLEFT", rightPanel, "TOPLEFT", PANEL_PAD, ry)
+                item.widget:Show()
+                ry = ry - item.height - 8
+            end
+
+            y = y - maxH - 8
+        end
+        prevType = section.type
+    end
+
+    -- Clean up old divider if it exists
+    if frame._bncDivider then
+        frame._bncDivider:Hide()
+    end
+
+    return y
+end
+
 local function CreateSettingsPage()
     local container = CreateScrollableFrame("BNCOptionsSettings")
     local frame = container.content
     local settingsControls = {}
+    local items = {}
 
-    local y = -16
-
-    -- Title
+    -- Title (full width)
     local title = frame:CreateFontString(nil, "OVERLAY")
     title:SetFontObject(GameFontNormalLarge)
-    title:SetTextColor(unpack(Colors.textPrimary))
+    title:SetTextColor(1, 0.82, 0)
     title:SetText("Settings")
-    title:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
-    y = y - 30
+    local titleFrame = CreateFrame("Frame", nil, frame)
+    titleFrame:SetSize(500, 24)
+    title:SetPoint("TOPLEFT", titleFrame, "TOPLEFT", 0, 0)
+    table.insert(items, { widget = titleFrame, height = 24, fullWidth = true })
 
-    -- Corner picker
+    -- Panel Position header (full width)
+    local posHeader = frame:CreateFontString(nil, "OVERLAY")
+    posHeader:SetFontObject(GameFontNormal)
+    posHeader:SetTextColor(1, 0.82, 0)
+    posHeader:SetText("PANEL POSITION")
+    local posHeaderFrame = CreateFrame("Frame", nil, frame)
+    posHeaderFrame:SetSize(500, 20)
+    posHeader:SetPoint("TOPLEFT", posHeaderFrame, "TOPLEFT", 0, 0)
+    table.insert(items, { widget = posHeaderFrame, height = 20, fullWidth = true })
+
+    -- Corner picker (in a panel, not full width — treated as a single-item pair)
     local cornerPicker = addon.CreateCornerPicker(frame)
-    cornerPicker:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, cornerPicker)
-    y = y - cornerPicker:GetHeight() - 16
+    table.insert(items, { widget = cornerPicker, height = cornerPicker:GetHeight() })
 
-    -- Toast duration
+    -- Sliders (two-column)
     local toastSlider = addon.CreateSliderControl(frame, "Toast Duration (seconds)", 1, 15, 1, "toastDuration")
-    toastSlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, toastSlider)
-    y = y - toastSlider:GetHeight() - 12
+    table.insert(items, { widget = toastSlider, height = toastSlider:GetHeight() })
 
-    -- Panel opacity
     local opacitySlider = addon.CreateSliderControl(frame, "Panel Opacity", 0.5, 1.0, 0.05, "panelOpacity")
-    opacitySlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, opacitySlider)
-    y = y - opacitySlider:GetHeight() - 12
+    table.insert(items, { widget = opacitySlider, height = opacitySlider:GetHeight() })
 
-    -- Scale
     local scaleSlider = addon.CreateSliderControl(frame, "Scale", 0.5, 2.0, 0.1, "scale")
-    scaleSlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, scaleSlider)
-    y = y - scaleSlider:GetHeight() - 12
+    table.insert(items, { widget = scaleSlider, height = scaleSlider:GetHeight() })
 
-    -- Max notifications
     local historySlider = addon.CreateSliderControl(frame, "Max Notifications", 10, 999, 10, "maxHistory")
-    historySlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, historySlider)
-    y = y - historySlider:GetHeight() - 16
+    table.insert(items, { widget = historySlider, height = historySlider:GetHeight() })
 
-    -- Toggles
+    -- Toggles (two-column)
     local toastCheck = addon.CreateCheckboxControl(frame, "Enable Toast Popups", "toastsEnabled")
-    toastCheck:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, toastCheck)
-    y = y - toastCheck:GetHeight() - 8
+    table.insert(items, { widget = toastCheck, height = toastCheck:GetHeight() })
 
     local soundCheck = addon.CreateCheckboxControl(frame, "Enable Sounds", "soundEnabled")
-    soundCheck:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, soundCheck)
-    y = y - soundCheck:GetHeight() - 8
+    table.insert(items, { widget = soundCheck, height = soundCheck:GetHeight() })
 
     local tomtomCheck = addon.CreateCheckboxControl(frame, "Enable TomTom Waypoints", "tomtomEnabled")
-    tomtomCheck:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, tomtomCheck)
-    y = y - tomtomCheck:GetHeight() - 16
+    table.insert(items, { widget = tomtomCheck, height = tomtomCheck:GetHeight() })
 
-    -- DND section
-    _, y = AddHeader(frame, y, "DO NOT DISTURB")
+    -- DND header (full width)
+    local dndHeader = frame:CreateFontString(nil, "OVERLAY")
+    dndHeader:SetFontObject(GameFontNormal)
+    dndHeader:SetTextColor(1, 0.82, 0)
+    dndHeader:SetText("DO NOT DISTURB")
+    local dndHeaderFrame = CreateFrame("Frame", nil, frame)
+    dndHeaderFrame:SetSize(500, 20)
+    dndHeader:SetPoint("TOPLEFT", dndHeaderFrame, "TOPLEFT", 0, 0)
+    table.insert(items, { widget = dndHeaderFrame, height = 20, fullWidth = true })
 
-    local dndCheck = addon.CreateCheckboxControl(frame, "Enable Do Not Disturb (suppress toasts & sounds)", "dndEnabled")
-    dndCheck:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
+    local dndCheck = addon.CreateCheckboxControl(frame, "Enable DND (suppress toasts & sounds)", "dndEnabled")
     table.insert(settingsControls, dndCheck)
-    y = y - dndCheck:GetHeight() - 8
+    table.insert(items, { widget = dndCheck, height = dndCheck:GetHeight() })
 
-    local dndCombatCheck = addon.CreateCheckboxControl(frame, "Auto-enable DND in combat", "dndAutoCombat")
-    dndCombatCheck:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
+    local dndCombatCheck = addon.CreateCheckboxControl(frame, "Auto-enable in combat", "dndAutoCombat")
     table.insert(settingsControls, dndCombatCheck)
-    y = y - dndCombatCheck:GetHeight() - 8
+    table.insert(items, { widget = dndCombatCheck, height = dndCombatCheck:GetHeight() })
 
-    local dndInstanceCheck = addon.CreateCheckboxControl(frame, "Auto-enable DND during boss encounters", "dndAutoInstance")
-    dndInstanceCheck:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
+    local dndInstanceCheck = addon.CreateCheckboxControl(frame, "Auto-enable during encounters", "dndAutoInstance")
     table.insert(settingsControls, dndInstanceCheck)
-    y = y - dndInstanceCheck:GetHeight() - 16
+    table.insert(items, { widget = dndInstanceCheck, height = dndInstanceCheck:GetHeight() })
 
-    -- Sound section
-    _, y = AddHeader(frame, y, "NOTIFICATION SOUNDS")
+    -- Sound header (full width)
+    local soundHeader = frame:CreateFontString(nil, "OVERLAY")
+    soundHeader:SetFontObject(GameFontNormal)
+    soundHeader:SetTextColor(1, 0.82, 0)
+    soundHeader:SetText("NOTIFICATION SOUNDS")
+    local soundHeaderFrame = CreateFrame("Frame", nil, frame)
+    soundHeaderFrame:SetSize(500, 20)
+    soundHeader:SetPoint("TOPLEFT", soundHeaderFrame, "TOPLEFT", 0, 0)
+    table.insert(items, { widget = soundHeaderFrame, height = 20, fullWidth = true })
 
     local soundHighSlider = addon.CreateSliderControl(frame, "High Priority Sound ID (0 = silent)", 0, 100000, 1, "soundHigh")
-    soundHighSlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, soundHighSlider)
-    y = y - soundHighSlider:GetHeight() - 12
+    table.insert(items, { widget = soundHighSlider, height = soundHighSlider:GetHeight() })
 
     local soundNormalSlider = addon.CreateSliderControl(frame, "Normal Priority Sound ID (0 = silent)", 0, 100000, 1, "soundNormal")
-    soundNormalSlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, soundNormalSlider)
-    y = y - soundNormalSlider:GetHeight() - 12
+    table.insert(items, { widget = soundNormalSlider, height = soundNormalSlider:GetHeight() })
 
     local soundLowSlider = addon.CreateSliderControl(frame, "Low Priority Sound ID (0 = silent)", 0, 100000, 1, "soundLow")
-    soundLowSlider:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
     table.insert(settingsControls, soundLowSlider)
-    y = y - soundLowSlider:GetHeight() - 16
+    table.insert(items, { widget = soundLowSlider, height = soundLowSlider:GetHeight() })
+
+    -- Layout everything
+    LayoutTwoColumn(frame, items, frame:GetWidth() or 580)
 
     container:SetScript("OnShow", function()
         for _, ctrl in ipairs(settingsControls) do
@@ -287,15 +408,24 @@ local function CreateModulesPage()
             ctrl:SetParent(nil)
         end
         wipe(container.moduleToggles)
+        -- Clear leaked font strings from previous renders
+        for _, region in pairs({ frame:GetRegions() }) do
+            region:Hide()
+            region:SetParent(nil)
+        end
 
-        local y = -16
+        local modItems = {}
 
+        -- Title (full width)
         local title = frame:CreateFontString(nil, "OVERLAY")
         title:SetFontObject(GameFontNormalLarge)
-        title:SetTextColor(unpack(Colors.textPrimary))
+        title:SetTextColor(1, 0.82, 0)
         title:SetText("Modules")
-        title:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
-        y = y - 24
+        local titleFrame = CreateFrame("Frame", nil, frame)
+        titleFrame:SetSize(500, 24)
+        title:SetPoint("TOPLEFT", titleFrame, "TOPLEFT", 0, 0)
+        table.insert(modItems, { widget = titleFrame, height = 24, fullWidth = true })
+        table.insert(container.moduleToggles, titleFrame)
 
         local desc = frame:CreateFontString(nil, "OVERLAY")
         desc:SetFontObject(GameFontHighlight)
@@ -303,8 +433,11 @@ local function CreateModulesPage()
         desc:SetWidth(500)
         desc:SetJustifyH("LEFT")
         desc:SetText("Enable or disable notification modules. Each module has its own settings in its sub-tab.")
-        desc:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
-        y = y - desc:GetStringHeight() - 16
+        local descFrame = CreateFrame("Frame", nil, frame)
+        descFrame:SetSize(500, desc:GetStringHeight() + 8)
+        desc:SetPoint("TOPLEFT", descFrame, "TOPLEFT", 0, 0)
+        table.insert(modItems, { widget = descFrame, height = desc:GetStringHeight() + 8, fullWidth = true })
+        table.insert(container.moduleToggles, descFrame)
 
         -- Sort modules alphabetically
         local sorted = {}
@@ -317,8 +450,7 @@ local function CreateModulesPage()
 
         for _, info in ipairs(sorted) do
             local ctrl = CreateFrame("Frame", nil, frame)
-            ctrl:SetSize(400, 26)
-            ctrl:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
+            ctrl:SetSize(240, 26)
 
             ctrl.check = CreateFrame("CheckButton", nil, ctrl, "UICheckButtonTemplate")
             ctrl.check:SetSize(22, 22)
@@ -341,11 +473,11 @@ local function CreateModulesPage()
                 addon.Events:Trigger("MODULE_TOGGLED", moduleId, self:GetChecked())
             end)
 
-            ctrl:Show()
             table.insert(container.moduleToggles, ctrl)
-            y = y - 30
+            table.insert(modItems, { widget = ctrl, height = 26 })
         end
 
+        LayoutTwoColumn(frame, modItems, frame:GetWidth() or 580)
         UpdateContentHeight(container)
     end
 
@@ -370,21 +502,22 @@ local function CreateModuleOptionsPage(moduleId)
     local container = CreateScrollableFrame("BNCOptions_" .. moduleId)
     local frame = container.content
     container.optControls = {}
+    local items = {}
 
-    local y = -16
-
+    -- Title (full width)
     local title = frame:CreateFontString(nil, "OVERLAY")
     title:SetFontObject(GameFontNormalLarge)
-    title:SetTextColor(unpack(Colors.textPrimary))
+    title:SetTextColor(1, 0.82, 0)
     title:SetText(module.name)
-    title:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
-    y = y - 40
+    local titleFrame = CreateFrame("Frame", nil, frame)
+    titleFrame:SetSize(500, 30)
+    title:SetPoint("TOPLEFT", titleFrame, "TOPLEFT", 0, 0)
+    table.insert(items, { widget = titleFrame, height = 30, fullWidth = true })
 
     for _, optDef in ipairs(optDefs) do
         if optDef.type == "toggle" then
             local ctrl = CreateFrame("Frame", nil, frame)
-            ctrl:SetSize(280, 26)
-            ctrl:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
+            ctrl:SetSize(240, 26)
 
             ctrl.check = CreateFrame("CheckButton", nil, ctrl, "UICheckButtonTemplate")
             ctrl.check:SetSize(22, 22)
@@ -409,14 +542,12 @@ local function CreateModuleOptionsPage(moduleId)
                 BNC:SetModuleSetting(moduleId, key, self:GetChecked())
             end)
 
-            ctrl:Show()
             table.insert(container.optControls, ctrl)
-            y = y - 28
+            table.insert(items, { widget = ctrl, height = 26 })
 
         elseif optDef.type == "slider" then
             local ctrl = CreateFrame("Frame", nil, frame)
-            ctrl:SetSize(280, 50)
-            ctrl:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, y)
+            ctrl:SetSize(240, 50)
 
             ctrl.label = ctrl:CreateFontString(nil, "OVERLAY")
             ctrl.label:SetFontObject(GameFontNormal)
@@ -430,7 +561,7 @@ local function CreateModuleOptionsPage(moduleId)
             ctrl.value:SetPoint("TOPRIGHT", ctrl, "TOPRIGHT", 0, 0)
 
             ctrl.slider = CreateFrame("Slider", nil, ctrl, "MinimalSliderTemplate")
-            ctrl.slider:SetSize(200, 16)
+            ctrl.slider:SetSize(180, 16)
             ctrl.slider:SetPoint("TOPLEFT", ctrl.label, "BOTTOMLEFT", 0, -6)
             ctrl.slider:SetMinMaxValues(optDef.min or 1, optDef.max or 15)
             ctrl.slider:SetValueStep(optDef.step or 1)
@@ -453,11 +584,12 @@ local function CreateModuleOptionsPage(moduleId)
                 BNC:SetModuleSetting(moduleId, key, newVal)
             end)
 
-            ctrl:Show()
             table.insert(container.optControls, ctrl)
-            y = y - 54
+            table.insert(items, { widget = ctrl, height = 50 })
         end
     end
+
+    LayoutTwoColumn(frame, items, frame:GetWidth() or 580)
 
     container:SetScript("OnShow", function()
         for _, ctrl in ipairs(container.optControls) do

@@ -2,11 +2,10 @@ local addonName, addon = ...
 
 local Colors = addon.Colors
 local SLIDER_HEIGHT = 40
-local SLIDER_WIDTH = 200
 
 function addon.CreateSliderControl(parent, label, minVal, maxVal, step, dbKey)
     local container = CreateFrame("Frame", nil, parent)
-    container:SetSize(280, SLIDER_HEIGHT + 20)
+    container:SetSize(240, SLIDER_HEIGHT + 20)
 
     -- Label
     container.label = container:CreateFontString(nil, "OVERLAY")
@@ -15,22 +14,21 @@ function addon.CreateSliderControl(parent, label, minVal, maxVal, step, dbKey)
     container.label:SetText(label)
     container.label:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
 
-    -- Value text
-    container.value = container:CreateFontString(nil, "OVERLAY")
-    container.value:SetFontObject(GameFontHighlightSmall)
-    container.value:SetTextColor(unpack(Colors.textSecondary))
-    container.value:SetPoint("TOPRIGHT", container, "TOPRIGHT", 0, 0)
-
     -- Slider
     container.slider = CreateFrame("Slider", nil, container, "MinimalSliderTemplate")
-    container.slider:SetSize(SLIDER_WIDTH, 16)
+    container.slider:SetSize(170, 16)
     container.slider:SetPoint("TOPLEFT", container.label, "BOTTOMLEFT", 0, -6)
     container.slider:SetMinMaxValues(minVal, maxVal)
     container.slider:SetValueStep(step)
     container.slider:SetObeyStepOnDrag(true)
 
+    -- Value text (anchored to right of slider, not right of container)
+    container.value = container:CreateFontString(nil, "OVERLAY")
+    container.value:SetFontObject(GameFontHighlightSmall)
+    container.value:SetTextColor(unpack(Colors.textSecondary))
+    container.value:SetPoint("LEFT", container.slider, "RIGHT", 8, 0)
+
     local function UpdateValue(val)
-        -- Round to step
         val = math.floor(val / step + 0.5) * step
         container.value:SetText(string.format(step < 1 and "%.2f" or "%d", val))
         if addon.db and addon.db[dbKey] ~= val then

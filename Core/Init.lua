@@ -42,6 +42,17 @@ function BNC_TogglePanel()
     end
 end
 
+-- Register with BazCore minimap button
+if BazCore and BazCore.RegisterMinimapEntry then
+    BazCore:RegisterMinimapEntry("BazNotificationCenter", {
+        label = "BazNotificationCenter",
+        icon = "Interface\\Icons\\INV_Misc_Bell_01",
+        onClick = function()
+            if addon.OpenOptions then addon.OpenOptions() end
+        end,
+    })
+end
+
 -- TomTom integration
 function BNC:HasTomTom()
     return TomTom and TomTom.AddWaypoint and true or false
