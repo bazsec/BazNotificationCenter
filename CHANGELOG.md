@@ -1,5 +1,11 @@
 # BazNotificationCenter Changelog
 
+## 004 - BazCore Options Integration
+- Options panel now fully powered by BazCore:RegisterOptionsTable()
+- Removed custom slider, checkbox, and corner picker controls
+- All styling (panels, headers, scroll bars) inherited from BazCore
+- Per-module settings pages auto-generated as BazCore subcategories
+
 ## 003 - Options Panel Polish
 - Two-column bordered panel layout for settings pages
 - Yellow headers and titles matching Baz Suite style

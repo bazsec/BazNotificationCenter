@@ -2,7 +2,7 @@
 ## Title: BazNotificationCenter
 ## Notes: A modern, polished notification center for World of Warcraft.
 ## Author: Baz4k
-## Version: 003
+## Version: 004
 ## X-License: GPL v2
 ## X-Curse-Project-ID: 1498445
 ## Dependencies: BazCore
@@ -42,9 +42,6 @@ UI\Panel.lua
 UI\ToggleButton.lua
 
 # Options
-Options\SliderControl.lua
-Options\CheckboxControl.lua
-Options\CornerPicker.lua
 Options\OptionsPanel.lua
 
 # Modules
