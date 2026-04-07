@@ -1,7 +1,8 @@
--- ==========================================================================
--- DoNotDisturb: Suppresses toasts and sounds when active.
+---------------------------------------------------------------------------
+-- BazNotificationCenter: Do Not Disturb
+-- Suppresses toasts and sounds when active.
 -- Can be toggled manually or auto-enabled in combat / rated instances.
--- ==========================================================================
+---------------------------------------------------------------------------
 local addonName, addon = ...
 
 -- Runtime DND state (not saved — auto-DND resets on combat/instance end)
@@ -32,42 +33,22 @@ function BNC:IsDND()
     return addon.IsDND()
 end
 
--- Auto-DND: combat
-local combatFrame = CreateFrame("Frame")
-combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-combatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-combatFrame:SetScript("OnEvent", function(self, event)
-    if not addon.db or not addon.db.dndAutoCombat then return end
-    if event == "PLAYER_REGEN_DISABLED" then
-        addon.dndActive = true
-    elseif event == "PLAYER_REGEN_ENABLED" then
-        addon.dndActive = false
-    end
-end)
-
--- Auto-DND: rated PvP / challenging instance content
-local instanceFrame = CreateFrame("Frame")
-instanceFrame:RegisterEvent("ENCOUNTER_START")
-instanceFrame:RegisterEvent("ENCOUNTER_END")
-instanceFrame:SetScript("OnEvent", function(self, event)
-    if not addon.db or not addon.db.dndAutoInstance then return end
-    if event == "ENCOUNTER_START" then
-        addon.dndActive = true
-    elseif event == "ENCOUNTER_END" then
-        addon.dndActive = false
-    end
-end)
-
--- Slash command: /bnc dnd
+-- Auto-DND via BazCore events (registered after CORE_LOADED)
 addon.Events:Register("CORE_LOADED", function()
-    local origSlashHandler = SlashCmdList["BNC"]
-    if origSlashHandler then
-        SlashCmdList["BNC"] = function(msg)
-            if msg and msg:lower():match("^dnd") then
-                BNC:ToggleDND()
-            else
-                origSlashHandler(msg)
-            end
+    if not addon.bncAddon then return end
+
+    addon.bncAddon:On({
+        "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED",
+        "ENCOUNTER_START", "ENCOUNTER_END",
+    }, function(event)
+        if event == "PLAYER_REGEN_DISABLED" then
+            if addon.db and addon.db.dndAutoCombat then addon.dndActive = true end
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            if addon.db and addon.db.dndAutoCombat then addon.dndActive = false end
+        elseif event == "ENCOUNTER_START" then
+            if addon.db and addon.db.dndAutoInstance then addon.dndActive = true end
+        elseif event == "ENCOUNTER_END" then
+            if addon.db and addon.db.dndAutoInstance then addon.dndActive = false end
         end
-    end
+    end)
 end)

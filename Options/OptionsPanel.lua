@@ -381,6 +381,14 @@ addon.Events:Register("CORE_LOADED", function()
     BazCore:RegisterOptionsTable("BNC_Modules", GetModulesOptionsTable)
     BazCore:AddToSettings("BNC_Modules", "Modules", "BNC")
 
+    -- Profiles subcategory
+    if BazCore.GetProfileOptionsTable then
+        BazCore:RegisterOptionsTable("BNC_Profiles", function()
+            return BazCore:GetProfileOptionsTable("BazNotificationCenter")
+        end)
+        BazCore:AddToSettings("BNC_Profiles", "Profiles", "BNC")
+    end
+
     -- Now safe to create per-module pages
     optionsReady = true
     TryCreateAllPendingPages()

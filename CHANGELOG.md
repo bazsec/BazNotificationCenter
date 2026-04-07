@@ -1,5 +1,16 @@
 # BazNotificationCenter Changelog
 
+## 007 - Full BazCore Migration
+- Lifecycle now managed by BazCore:RegisterAddon() (SV init, profiles, slash, minimap)
+- Removed standalone WoW event frame — WoW events use BazCore addon:On()
+- Internal CallbackRegistry kept for BNC-specific events (NOTIFICATION_ADDED, etc.)
+- Database.lua slimmed to just SetDBValue/GetDBValue helpers
+- DoNotDisturb now uses BazCore events instead of standalone frames
+- Slash commands registered declaratively via BazCore commands config
+- Profile system enabled — per-character notification preferences
+- Profiles subcategory added to settings panel
+- Data migration from flat SV to profile structure for existing users
+
 ## 006 - Audit Fixes
 - Removed dead IsHistoryAvailable() check for defunct BNC-History addon
 - History tab always visible (built-in)

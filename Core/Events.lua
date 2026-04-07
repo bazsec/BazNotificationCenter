@@ -1,3 +1,8 @@
+---------------------------------------------------------------------------
+-- BazNotificationCenter: Internal CallbackRegistry
+-- Custom event system for internal addon coordination
+-- WoW events are handled by BazCore (addon.bncAddon:On())
+---------------------------------------------------------------------------
 local addonName, addon = ...
 
 local CallbackRegistry = {}
@@ -44,26 +49,5 @@ function CallbackRegistry:Trigger(event, ...)
     end
 end
 
--- Create the global callback registry for the addon
+-- Create the global callback registry for internal BNC events
 addon.Events = CallbackRegistry:New()
-
--- WoW event frame
-local eventFrame = CreateFrame("Frame")
-local wowEventHandlers = {}
-
-function addon.RegisterEvent(event, handler)
-    wowEventHandlers[event] = handler
-    eventFrame:RegisterEvent(event)
-end
-
-function addon.UnregisterEvent(event)
-    wowEventHandlers[event] = nil
-    eventFrame:UnregisterEvent(event)
-end
-
-eventFrame:SetScript("OnEvent", function(self, event, ...)
-    local handler = wowEventHandlers[event]
-    if handler then
-        handler(event, ...)
-    end
-end)
