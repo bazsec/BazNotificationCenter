@@ -1,5 +1,11 @@
 # BazNotificationCenter Changelog
 
+## 002 - Built-In History
+- History system now built into the main addon (no separate BNC-History required)
+- History stored directly in BazNotificationCenterDB
+- Notifications automatically saved to persistent history
+- Removed history buffer flush system (no longer needed)
+
 ## 001 - Initial Release
 - Rebranded from WNC (WoW Notification Center) to BazNotificationCenter
 - Integrated with BazCore framework (replaces LibStub, LibDataBroker, LibDBIcon)

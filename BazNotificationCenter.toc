@@ -2,7 +2,7 @@
 ## Title: BazNotificationCenter
 ## Notes: A modern, polished notification center for World of Warcraft.
 ## Author: Baz4k
-## Version: 001
+## Version: 002
 ## X-License: GPL v2
 ## X-Curse-Project-ID: 1498445
 ## Dependencies: BazCore
@@ -20,6 +20,7 @@ Utils\Anchoring.lua
 Core\Init.lua
 Core\Events.lua
 Core\Database.lua
+Core\History.lua
 Core\SlashCommands.lua
 Core\BlizzardFrames.lua
 Core\DoNotDisturb.lua

@@ -16,7 +16,7 @@ local DEFAULTS = {
     soundNormal = 618,        -- SOUNDKIT: normal priority sound ID (default whoosh)
     soundLow = 0,             -- 0 = no sound for low priority
     modules = {},
-    historyBuffer = {},  -- small buffer, flushed to BNC-History on logout
+    history = { days = {}, dayIndex = {} },
 }
 
 local function MergeDefaults(target, defaults)
@@ -34,37 +34,6 @@ local function MergeDefaults(target, defaults)
     end
 end
 
--- Flush history buffer to BNC-History on logout
-local function FlushHistoryBuffer()
-    if not addon.db or not addon.db.historyBuffer or #addon.db.historyBuffer == 0 then return end
-
-    -- Load the BNC-History addon if not already loaded
-    if not BNC_History_AppendEntries then
-        C_AddOns.LoadAddOn("BNC-History")
-    end
-
-    -- Append buffered entries to persistent storage
-    if BNC_History_AppendEntries then
-        BNC_History_AppendEntries(addon.db.historyBuffer)
-        wipe(addon.db.historyBuffer)
-    end
-    -- If BNC_History_AppendEntries still doesn't exist, keep buffer for next time
-end
-
--- Migrate old history data if it exists
-local function MigrateOldHistory()
-    if addon.db.history and type(addon.db.history) == "table" and #addon.db.history > 0 then
-        if not addon.db.historyBuffer then
-            addon.db.historyBuffer = {}
-        end
-        for _, entry in ipairs(addon.db.history) do
-            table.insert(addon.db.historyBuffer, entry)
-        end
-    end
-    addon.db.history = nil
-    addon.db.maxHistoryLog = nil
-end
-
 addon.RegisterEvent("ADDON_LOADED", function(event, loadedAddon)
     if loadedAddon ~= addonName then return end
 
@@ -77,9 +46,6 @@ addon.RegisterEvent("ADDON_LOADED", function(event, loadedAddon)
 
     addon.db = BazNotificationCenterDB
 
-    -- Migrate old history format
-    MigrateOldHistory()
-
     addon.UnregisterEvent("ADDON_LOADED")
     addon.Events:Trigger("CORE_LOADED")
 end)
@@ -88,13 +54,12 @@ addon.RegisterEvent("PLAYER_ENTERING_WORLD", function(event, isLogin, isReload)
     addon.Events:Trigger("PLAYER_READY", isLogin, isReload)
 end)
 
-addon.RegisterEvent("PLAYER_LOGOUT", function()
-    FlushHistoryBuffer()
-end)
+-- History is always available now (built-in)
+addon.historyLoaded = true
 
--- Expose for use by HistoryPanel
-addon.FlushHistoryBuffer = FlushHistoryBuffer
-addon.historyLoaded = false
+function addon.IsHistoryAvailable()
+    return true
+end
 
 -- Public getter/setter that triggers change events
 function addon.SetDBValue(key, value)

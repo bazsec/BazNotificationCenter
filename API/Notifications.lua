@@ -23,15 +23,17 @@ function BNC:Push(data)
             existing.dupeCount = (existing.dupeCount or 1) + 1
             existing.priority = data.priority or existing.priority
 
-            -- Save to history buffer even for deduped entries
-            if addon.db and addon.db.historyBuffer and addon.IsHistoryAvailable() then
-                table.insert(addon.db.historyBuffer, {
-                    module = existing.module,
-                    title = existing.title,
-                    message = existing.message,
-                    icon = existing.icon,
-                    priority = existing.priority,
-                    realTime = realTime,
+            -- Save to persistent history even for deduped entries
+            if addon.History_AppendEntries then
+                addon.History_AppendEntries({
+                    {
+                        module = existing.module,
+                        title = existing.title,
+                        message = existing.message,
+                        icon = existing.icon,
+                        priority = existing.priority,
+                        realTime = realTime,
+                    },
                 })
             end
 
@@ -72,18 +74,18 @@ function BNC:Push(data)
         end
     end
 
-    -- Save to history buffer (will be flushed to BNC-History on logout)
-    -- Only if BNC-History addon is installed
-    if addon.db and addon.db.historyBuffer and addon.IsHistoryAvailable() then
-        local historyEntry = {
-            module = notification.module,
-            title = notification.title,
-            message = notification.message,
-            icon = notification.icon,
-            priority = notification.priority,
-            realTime = realTime,
-        }
-        table.insert(addon.db.historyBuffer, historyEntry)
+    -- Save to persistent history
+    if addon.History_AppendEntries then
+        addon.History_AppendEntries({
+            {
+                module = notification.module,
+                title = notification.title,
+                message = notification.message,
+                icon = notification.icon,
+                priority = notification.priority,
+                realTime = realTime,
+            },
+        })
     end
 
     -- Notify UI
@@ -187,45 +189,12 @@ function BNC:GetNotificationsByModule()
     return grouped, order
 end
 
--- History API (loads BNC-History on demand)
+-- History is built-in, always available
 function BNC:LoadHistory()
-    if addon.historyLoaded then return true end
-
-    -- Load the BNC-History addon
-    local loaded, reason = C_AddOns.LoadAddOn("BNC-History")
-
-    -- In modern WoW, LoadAddOn may return differently - also check if the global exists
-    if BNC_History_Search then
-        addon.historyLoaded = true
-
-        -- Flush buffer into the now-loaded history addon
-        if addon.db and addon.db.historyBuffer and #addon.db.historyBuffer > 0 then
-            if BNC_History_AppendEntries then
-                BNC_History_AppendEntries(addon.db.historyBuffer)
-                wipe(addon.db.historyBuffer)
-            end
-        end
-
-        return true
-    end
-
-    -- Fallback check
-    if loaded then
-        addon.historyLoaded = true
-        return true
-    end
-
-    print("|cff00aaff[BNC]|r Failed to load BNC-History: " .. tostring(reason))
-    return false
+    return true
 end
 
 function BNC:ClearHistory()
-    if self:LoadHistory() and BNC_History_PurgeAll then
-        BNC_History_PurgeAll()
-    end
-    -- Also clear the buffer
-    if addon.db and addon.db.historyBuffer then
-        wipe(addon.db.historyBuffer)
-    end
+    addon.History_PurgeAll()
     addon.Events:Trigger("HISTORY_CLEARED")
 end
