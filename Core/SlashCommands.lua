@@ -133,9 +133,7 @@ SlashCmdList["BNC"] = function(msg)
         print("|cff00aaff[BNC]|r Sending test notifications...")
         SendTestBurst()
     elseif cmd == "history" then
-        if not addon.IsHistoryAvailable() then
-            print("|cff00aaff[BNC]|r Install the BNC-History addon to enable notification history.")
-        elseif addon.ShowHistoryPanel then
+        if addon.ShowHistoryPanel then
             addon.ShowHistoryPanel()
         end
     elseif cmd == "clear" then

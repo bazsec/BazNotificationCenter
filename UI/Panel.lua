@@ -524,13 +524,6 @@ local function CreatePanel()
     panel.historyTab = CreateTab("History", "history")
     panel.historyTab:SetPoint("LEFT", panel.notifTab, "RIGHT", 8, 0)
 
-    -- Hide tabs entirely if BNC-History isn't installed
-    panel.hasHistory = addon.IsHistoryAvailable()
-    if not panel.hasHistory then
-        panel.tabRow:Hide()
-        panel.historyTab:Hide()
-    end
-
     -- Tab divider
     local tDiv = panel.tabRow:CreateTexture(nil, "ARTWORK")
     tDiv:SetHeight(1)
@@ -541,7 +534,7 @@ local function CreatePanel()
     -----------------------------------------------------------
     -- Notifications content area
     -----------------------------------------------------------
-    local tabOffset = panel.hasHistory and TAB_HEIGHT or 0
+    local tabOffset = TAB_HEIGHT
     local filterTop = HEADER_HEIGHT + tabOffset + 4
     local notifTop = filterTop + FILTER_ROW_HEIGHT + 4
 

@@ -1,5 +1,11 @@
 # BazNotificationCenter Changelog
 
+## 006 - Audit Fixes
+- Removed dead IsHistoryAvailable() check for defunct BNC-History addon
+- History tab always visible (built-in)
+- Fixed panel text overlapping (tab offset calculation)
+- Category changed to "Baz Suite"
+
 ## 005
 - Fixed per-module settings subcategories not appearing (timing fix)
 - Module options pages now properly register after parent category exists

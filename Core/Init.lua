@@ -27,12 +27,9 @@ addon.panel = nil
 -- Store addon namespace for internal use
 addon.name = addonName
 
--- Check if BNC-History addon is available and enabled
+-- History is always available (built-in)
 function addon.IsHistoryAvailable()
-    local name = C_AddOns.GetAddOnInfo("BNC-History")
-    if not name then return false end
-    local enabled = C_AddOns.GetAddOnEnableState("BNC-History")
-    return enabled and enabled > 0
+    return true
 end
 
 -- Global toggle function for AddonCompartmentFunc

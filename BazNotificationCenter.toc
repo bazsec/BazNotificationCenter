@@ -2,14 +2,14 @@
 ## Title: BazNotificationCenter
 ## Notes: A modern, polished notification center for World of Warcraft.
 ## Author: Baz4k
-## Version: 005
+## Version: 006
 ## X-License: GPL v2
 ## X-Curse-Project-ID: 1498445
 ## Dependencies: BazCore
 ## SavedVariables: BazNotificationCenterDB
 ## IconTexture: Interface\Icons\INV_Misc_Bell_01
 ## AddonCompartmentFunc: BNC_TogglePanel
-## Category: User Interface
+## Category: Baz Suite
 
 # Utils
 Utils\SafeCall.lua
