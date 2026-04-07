@@ -1,5 +1,12 @@
 # BazNotificationCenter Changelog
 
+## 003 - Options Panel Polish
+- Two-column bordered panel layout for settings pages
+- Yellow headers and titles matching Baz Suite style
+- Minimap button now opens settings panel
+- Fixed modules page double-rendering on revisit
+- Slider value text properly anchored within column bounds
+
 ## 002 - Built-In History
 - History system now built into the main addon (no separate BNC-History required)
 - History stored directly in BazNotificationCenterDB
