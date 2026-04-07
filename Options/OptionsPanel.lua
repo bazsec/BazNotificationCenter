@@ -366,8 +366,10 @@ local function TryCreateAllPendingPages()
     end
 end
 
+local optionsReady = false
+
 addon.Events:Register("CORE_LOADED", function()
-    -- Main page (user manual)
+    -- Main page (user manual) — must be first so parent category exists
     BazCore:RegisterOptionsTable("BNC", GetMainOptionsTable)
     BazCore:AddToSettings("BNC", "BazNotificationCenter")
 
@@ -379,12 +381,18 @@ addon.Events:Register("CORE_LOADED", function()
     BazCore:RegisterOptionsTable("BNC_Modules", GetModulesOptionsTable)
     BazCore:AddToSettings("BNC_Modules", "Modules", "BNC")
 
-    -- Per-module pages
+    -- Now safe to create per-module pages
+    optionsReady = true
     TryCreateAllPendingPages()
 end)
 
-addon.Events:Register("MODULE_REGISTERED", TryCreateAllPendingPages)
-addon.Events:Register("MODULE_OPTIONS_REGISTERED", TryCreateAllPendingPages)
+-- These fire before CORE_LOADED, so guard with optionsReady
+addon.Events:Register("MODULE_REGISTERED", function()
+    if optionsReady then TryCreateAllPendingPages() end
+end)
+addon.Events:Register("MODULE_OPTIONS_REGISTERED", function()
+    if optionsReady then TryCreateAllPendingPages() end
+end)
 addon.Events:Register("PLAYER_READY", TryCreateAllPendingPages)
 
 function addon.OpenOptions()

@@ -1,5 +1,9 @@
 # BazNotificationCenter Changelog
 
+## 005
+- Fixed per-module settings subcategories not appearing (timing fix)
+- Module options pages now properly register after parent category exists
+
 ## 004 - BazCore Options Integration
 - Options panel now fully powered by BazCore:RegisterOptionsTable()
 - Removed custom slider, checkbox, and corner picker controls
