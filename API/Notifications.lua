@@ -189,11 +189,6 @@ function BNC:GetNotificationsByModule()
     return grouped, order
 end
 
--- History is built-in, always available
-function BNC:LoadHistory()
-    return true
-end
-
 function BNC:ClearHistory()
     addon.History_PurgeAll()
     addon.Events:Trigger("HISTORY_CLEARED")

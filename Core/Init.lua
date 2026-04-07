@@ -18,13 +18,6 @@ addon.suppressedFrames = {}
 addon.db = nil
 addon.panel = nil
 addon.name = addonName
-addon.historyLoaded = true
-
--- History is always available (built-in)
-function addon.IsHistoryAvailable()
-    return true
-end
-
 -- Global toggle function for AddonCompartmentFunc
 function BNC_TogglePanel()
     if addon.TogglePanel then

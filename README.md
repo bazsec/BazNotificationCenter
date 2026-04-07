@@ -32,7 +32,7 @@ Part of the **Baz Suite** of addons, powered by **BazCore**.
 - Bell icon toggle to open/close the panel
 - Notifications grouped by module with timestamps
 - Click notifications for item tooltips, TomTom waypoints, or custom actions
-- History tab (requires BNC-History) for persistent notification storage
+- History tab for persistent notification storage across sessions
 
 ### 20 Built-In Modules
 | Module | Notifications |

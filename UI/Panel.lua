@@ -47,8 +47,6 @@ local historyDateFilter = nil   -- nil, "today", "yesterday", "week", "month"
 local historySearch = ""
 local historyResults = {}
 local historyPage = 1
-local historyLoaded = false
-
 -- Card pool for history (separate from notification cards)
 local historyCardIndex = 0
 
@@ -868,15 +866,10 @@ end
 function addon.SwitchTab(tabKey)
     if not panel then return end
 
-    -- Don't allow switching to history if not available
-    if tabKey == "history" and not panel.hasHistory then return end
-
     currentTab = tabKey
 
-    if panel.hasHistory then
-        panel.notifTab:SetActive(tabKey == "notifications")
-        panel.historyTab:SetActive(tabKey == "history")
-    end
+    panel.notifTab:SetActive(tabKey == "notifications")
+    panel.historyTab:SetActive(tabKey == "history")
 
     if tabKey == "notifications" then
         panel.actionBtn.text:SetText("Clear all")
@@ -914,13 +907,6 @@ function addon.SwitchTab(tabKey)
         panel.histSearchBox:Show()
         historyScroll.clipFrame:Show()
         panel.histCount:Show()
-
-        -- Load BNC-History on demand
-        if not historyLoaded then
-            if BNC:LoadHistory() then
-                historyLoaded = true
-            end
-        end
 
         -- Refresh dropdown items
         panel.histModuleDropdown:SetItems(GetModuleDropdownItems())

@@ -1,5 +1,11 @@
 # BazNotificationCenter Changelog
 
+## 008 - Dead Code Cleanup
+- Fixed history tab not switching (panel.hasHistory was never set)
+- Removed dead IsHistoryAvailable(), LoadHistory(), historyLoaded
+- Removed stale on-demand history loading block from Panel.lua
+- Updated README to reflect built-in history
+
 ## 007 - Full BazCore Migration
 - Lifecycle now managed by BazCore:RegisterAddon() (SV init, profiles, slash, minimap)
 - Removed standalone WoW event frame — WoW events use BazCore addon:On()
