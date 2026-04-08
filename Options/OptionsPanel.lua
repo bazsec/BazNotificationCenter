@@ -11,85 +11,33 @@ local moduleSubCategories = {}
 ---------------------------------------------------------------------------
 
 local function GetMainOptionsTable()
-    return {
-        name = "BazNotificationCenter",
-        type = "group",
-        args = {
-            desc1 = {
-                order = 1,
-                type = "description",
-                name = "A modern, polished notification center for World of Warcraft. " ..
-                    "BazNotificationCenter captures game events and displays them as " ..
-                    "toasts and in a notification panel, keeping your UI clean and organized.",
-                fontSize = "medium",
-            },
-            gettingStarted = {
-                order = 2,
-                type = "header",
-                name = "Getting Started",
-            },
-            desc2 = {
-                order = 3,
-                type = "description",
-                name = "A bell icon appears on your screen. Left-click it to open the notification panel. " ..
-                    "Right-click it to clear all notifications. " ..
-                    "Toasts pop up briefly when new notifications arrive.",
-            },
-            panelHeader = {
-                order = 4,
-                type = "header",
-                name = "Notification Panel",
-            },
-            desc3 = {
-                order = 5,
-                type = "description",
-                name = "The panel shows your recent notifications grouped by module. " ..
-                    "Click a notification to interact with it — some support item tooltips, " ..
-                    "TomTom waypoints, or custom actions. The History tab stores notifications across sessions.",
-            },
-            dndHeader = {
-                order = 6,
-                type = "header",
-                name = "Do Not Disturb",
-            },
-            desc4 = {
-                order = 7,
-                type = "description",
-                name = "DND mode suppresses toasts and sounds while still logging notifications. " ..
-                    "Toggle manually with /bnc dnd, or set it to auto-enable during combat " ..
-                    "or boss encounters in the Settings tab.",
-            },
-            commandsHeader = {
-                order = 8,
-                type = "header",
-                name = "Slash Commands",
-            },
-            desc5 = {
-                order = 9,
-                type = "description",
-                name = "/bnc — Toggle notification panel\n" ..
-                    "/bnc test — Send a test notification\n" ..
-                    "/bnc testall — Send test notifications from all modules\n" ..
-                    "/bnc dnd — Toggle Do Not Disturb\n" ..
-                    "/bnc clear — Clear all notifications\n" ..
-                    "/bnc history — Open notification history\n" ..
-                    "/bnc options — Open this settings panel\n" ..
-                    "/bnc scaffold <name> — Print a module template for developers",
-            },
-            devHeader = {
-                order = 10,
-                type = "header",
-                name = "For Addon Developers",
-            },
-            desc6 = {
-                order = 11,
-                type = "description",
-                name = "Any addon can push notifications to BazNotificationCenter. " ..
-                    "Use /bnc scaffold <ModuleName> to generate a complete module template, " ..
-                    "or call BNC:RegisterModule() and BNC:Push() directly.",
-            },
+    return BazCore:CreateLandingPage("BazNotificationCenter", {
+        subtitle = "Notification center",
+        description = "A modern, polished notification center for World of Warcraft. " ..
+            "Captures game events and displays them as toasts and in a browsable notification panel. " ..
+            "20 built-in modules cover loot, achievements, mail, quests, reputation, and more.",
+        features = "Toast popups with priority-based sounds and auto-dismiss. " ..
+            "Notification panel with grouping, history, and search. " ..
+            "Do Not Disturb mode (manual or auto in combat/encounters). " ..
+            "Open plugin API — any addon can create notification modules.",
+        guide = {
+            { "Bell Icon", "Left-click to open the panel. Right-click to clear all" },
+            { "Toasts", "Brief popups appear for new events and auto-dismiss" },
+            { "History", "Switch to the History tab to browse past notifications" },
+            { "DND", "Use |cff00ff00/bnc dnd|r or enable auto-DND in Settings" },
+            { "Modules", "Enable or disable individual modules in the Modules tab" },
         },
-    }
+        commands = {
+            { "/bnc", "Toggle notification panel" },
+            { "/bnc test", "Send a test notification" },
+            { "/bnc testall", "Test all active modules" },
+            { "/bnc dnd", "Toggle Do Not Disturb" },
+            { "/bnc clear", "Clear all notifications" },
+            { "/bnc history", "Open notification history" },
+            { "/bnc options", "Open settings" },
+            { "/bnc scaffold <name>", "Generate a module template" },
+        },
+    })
 end
 
 ---------------------------------------------------------------------------
