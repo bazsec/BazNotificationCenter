@@ -45,6 +45,7 @@ local DEFAULTS = {
     soundNormal = 618,
     soundLow = 0,
     modules = {},
+    globalOverrides = {},
     history = { days = {}, dayIndex = {} },
 }
 

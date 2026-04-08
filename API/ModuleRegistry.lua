@@ -81,10 +81,36 @@ function BNC:RegisterModuleOptions(moduleId, optionsDef)
     addon.Events:Trigger("MODULE_OPTIONS_REGISTERED", moduleId)
 end
 
--- Get a module-specific setting value
+-- Get a module-specific setting value (respects global overrides)
 function BNC:GetModuleSetting(moduleId, key)
     if not addon.db or not addon.db.modules[moduleId] then return nil end
+
+    -- Check global overrides
+    local overrides = addon.db.globalOverrides
+    if overrides then
+        -- Direct key match (soundEnabled, toastsEnabled)
+        local override = overrides[key]
+        if override and override.enabled then
+            return override.value
+        end
+        -- Duration keys: any key ending in "Duration" uses toastDuration override
+        if overrides.toastDuration and overrides.toastDuration.enabled then
+            if key:find("Duration$") then
+                return overrides.toastDuration.value
+            end
+        end
+    end
+
     return addon.db.modules[moduleId][key]
+end
+
+-- Check if a global override is active for a given key
+function BNC:IsGlobalOverrideActive(key)
+    local overrides = addon.db and addon.db.globalOverrides
+    if not overrides then return false end
+    if overrides[key] and overrides[key].enabled then return true end
+    if key:find("Duration$") and overrides.toastDuration and overrides.toastDuration.enabled then return true end
+    return false
 end
 
 -- Set a module-specific setting value

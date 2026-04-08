@@ -236,6 +236,33 @@ local function GetModulesOptionsTable()
 end
 
 ---------------------------------------------------------------------------
+-- Global Options Subcategory
+---------------------------------------------------------------------------
+
+local function GetGlobalOptionsTable()
+    return BazCore:CreateGlobalOptionsPage("BazNotificationCenter", {
+        getOverrides = function()
+            if not addon.db then return {} end
+            if not addon.db.globalOverrides then addon.db.globalOverrides = {} end
+            return addon.db.globalOverrides
+        end,
+        setOverride = function(key, field, value)
+            if not addon.db then return end
+            if not addon.db.globalOverrides then addon.db.globalOverrides = {} end
+            if not addon.db.globalOverrides[key] then
+                addon.db.globalOverrides[key] = { enabled = false, value = nil }
+            end
+            addon.db.globalOverrides[key][field] = value
+        end,
+        overrides = {
+            { key = "toastDuration",  label = "Toast Duration",  type = "slider",  default = 5, min = 1, max = 15, step = 1 },
+            { key = "soundEnabled",   label = "Play Sound",      type = "toggle",  default = true },
+            { key = "toastsEnabled",  label = "Enable Toasts",   type = "toggle",  default = true },
+        },
+    })
+end
+
+---------------------------------------------------------------------------
 -- Per-Module Settings Subcategory
 ---------------------------------------------------------------------------
 
@@ -255,6 +282,11 @@ local function CreateModuleOptionsPage(moduleId)
             local key = optDef.key
             local default = optDef.default
 
+            -- Disable widget when a global override is active for this key
+            local disabledFunc = function()
+                return BNC:IsGlobalOverrideActive(key)
+            end
+
             if optDef.type == "toggle" then
                 args[key] = {
                     order = i,
@@ -268,6 +300,7 @@ local function CreateModuleOptionsPage(moduleId)
                     set = function(_, val)
                         BNC:SetModuleSetting(moduleId, key, val)
                     end,
+                    disabled = disabledFunc,
                 }
             elseif optDef.type == "slider" then
                 args[key] = {
@@ -285,6 +318,7 @@ local function CreateModuleOptionsPage(moduleId)
                     set = function(_, val)
                         BNC:SetModuleSetting(moduleId, key, val)
                     end,
+                    disabled = disabledFunc,
                 }
             end
         end
@@ -325,10 +359,6 @@ addon.Events:Register("CORE_LOADED", function()
     BazCore:RegisterOptionsTable("BazNotificationCenter-Settings", GetSettingsOptionsTable)
     BazCore:AddToSettings("BazNotificationCenter-Settings", "Settings", "BazNotificationCenter")
 
-    -- Modules subcategory
-    BazCore:RegisterOptionsTable("BazNotificationCenter-Modules", GetModulesOptionsTable)
-    BazCore:AddToSettings("BazNotificationCenter-Modules", "Modules", "BazNotificationCenter")
-
     -- Profiles subcategory
     if BazCore.GetProfileOptionsTable then
         BazCore:RegisterOptionsTable("BazNotificationCenter-Profiles", function()
@@ -336,6 +366,14 @@ addon.Events:Register("CORE_LOADED", function()
         end)
         BazCore:AddToSettings("BazNotificationCenter-Profiles", "Profiles", "BazNotificationCenter")
     end
+
+    -- Global Options subcategory
+    BazCore:RegisterOptionsTable("BazNotificationCenter-GlobalOptions", GetGlobalOptionsTable)
+    BazCore:AddToSettings("BazNotificationCenter-GlobalOptions", "Global Options", "BazNotificationCenter")
+
+    -- Modules subcategory
+    BazCore:RegisterOptionsTable("BazNotificationCenter-Modules", GetModulesOptionsTable)
+    BazCore:AddToSettings("BazNotificationCenter-Modules", "Modules", "BazNotificationCenter")
 
     -- Now safe to create per-module pages
     optionsReady = true

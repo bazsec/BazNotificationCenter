@@ -1,5 +1,11 @@
 # BazNotificationCenter Changelog
 
+## 011 - Global Options
+- Added Global Options page with overrides for toast duration, sound, and toasts across all modules
+- When a global override is enabled, per-module settings are grayed out but retain their local values
+- Toast Duration override applies to all module duration settings (any key ending in "Duration")
+- Subcategory order: Settings, Profiles, Global Options, Modules
+
 ## 008 - Dead Code Cleanup
 - Fixed history tab not switching (panel.hasHistory was never set)
 - Removed dead IsHistoryAvailable(), LoadHistory(), historyLoaded
