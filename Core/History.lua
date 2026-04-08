@@ -12,11 +12,12 @@ local function GetDateKey(timestamp)
 end
 
 local function GetHistory()
-    if not addon.db then return nil end
-    if not addon.db.history then
-        addon.db.history = { days = {}, dayIndex = {} }
+    local sv = _G["BazNotificationCenterDB"]
+    if not sv then return nil end
+    if not sv.history then
+        sv.history = { days = {}, dayIndex = {} }
     end
-    return addon.db.history
+    return sv.history
 end
 
 local function RebuildDayIndex()

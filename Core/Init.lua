@@ -46,7 +46,6 @@ local DEFAULTS = {
     soundLow = 0,
     modules = {},
     globalOverrides = {},
-    history = { days = {}, dayIndex = {} },
 }
 
 ---------------------------------------------------------------------------
@@ -119,28 +118,24 @@ BazCore:RegisterAddon("BazNotificationCenter", {
     },
 
     onLoad = function(self)
-        -- Migrate flat SV data from pre-profile versions
-        local sv = _G["BazNotificationCenterDB"]
-        if sv and sv.profiles and sv.profiles["Default"] then
-            local profile = sv.profiles["Default"]
-            local flatKeys = { "position", "toastDuration", "toastsEnabled", "soundEnabled",
-                "tomtomEnabled", "panelOpacity", "maxHistory", "scale", "dndEnabled",
-                "dndAutoCombat", "dndAutoInstance", "soundHigh", "soundNormal", "soundLow" }
-            for _, key in ipairs(flatKeys) do
-                if sv[key] ~= nil and profile[key] == nil then
-                    profile[key] = sv[key]
-                    sv[key] = nil
+        -- History is global (not per-profile) — stored in BazNotificationCenterDB directly
+        local sv = _G["BazNotificationCenterDB"] or {}
+        _G["BazNotificationCenterDB"] = sv
+        if not sv.history then
+            sv.history = { days = {}, dayIndex = {} }
+        end
+        -- Migrate history from old profile data into flat SV if needed
+        if self.db and self.db.profile then
+            local profileHistory = rawget(self.db.profile, "history")
+            if not profileHistory then
+                -- Check the actual profile table in BazCoreDB
+                local activeProfile = BazCore:GetActiveProfile()
+                local coreProfiles = BazCoreDB and BazCoreDB.profiles and BazCoreDB.profiles[activeProfile]
+                local bncSection = coreProfiles and coreProfiles["BazNotificationCenter"]
+                if bncSection and bncSection.history and bncSection.history.days then
+                    sv.history = bncSection.history
+                    bncSection.history = nil
                 end
-            end
-            -- Migrate modules table
-            if sv.modules and not profile.modules then
-                profile.modules = sv.modules
-                sv.modules = nil
-            end
-            -- Migrate history
-            if sv.history and type(sv.history) == "table" and sv.history.days and not profile.history then
-                profile.history = sv.history
-                sv.history = nil
             end
         end
 

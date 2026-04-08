@@ -1,5 +1,10 @@
 # BazNotificationCenter Changelog
 
+## 012 - Unified Profiles
+- Profiles now managed centrally in BazCore settings
+- Removed per-addon Profiles subcategory
+- Notification history moved to global storage (shared across all profiles)
+
 ## 011 - Global Options
 - Added Global Options page with overrides for toast duration, sound, and toasts across all modules
 - When a global override is enabled, per-module settings are grayed out but retain their local values

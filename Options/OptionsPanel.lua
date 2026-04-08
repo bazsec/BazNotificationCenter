@@ -359,14 +359,6 @@ addon.Events:Register("CORE_LOADED", function()
     BazCore:RegisterOptionsTable("BazNotificationCenter-Settings", GetSettingsOptionsTable)
     BazCore:AddToSettings("BazNotificationCenter-Settings", "Settings", "BazNotificationCenter")
 
-    -- Profiles subcategory
-    if BazCore.GetProfileOptionsTable then
-        BazCore:RegisterOptionsTable("BazNotificationCenter-Profiles", function()
-            return BazCore:GetProfileOptionsTable("BazNotificationCenter")
-        end)
-        BazCore:AddToSettings("BazNotificationCenter-Profiles", "Profiles", "BazNotificationCenter")
-    end
-
     -- Global Options subcategory
     BazCore:RegisterOptionsTable("BazNotificationCenter-GlobalOptions", GetGlobalOptionsTable)
     BazCore:AddToSettings("BazNotificationCenter-GlobalOptions", "Global Options", "BazNotificationCenter")
