@@ -296,8 +296,8 @@ local function CreateModuleOptionsPage(moduleId)
         }
     end
 
-    BazCore:RegisterOptionsTable("BNC_" .. moduleId, GetModuleOptionsTable)
-    BazCore:AddToSettings("BNC_" .. moduleId, module.name, "BNC")
+    BazCore:RegisterOptionsTable("BazNotificationCenter-" .. moduleId, GetModuleOptionsTable)
+    BazCore:AddToSettings("BazNotificationCenter-" .. moduleId, module.name, "BazNotificationCenter")
 
     moduleSubCategories[moduleId] = true
 end
@@ -318,23 +318,23 @@ local optionsReady = false
 
 addon.Events:Register("CORE_LOADED", function()
     -- Main page (user manual) — must be first so parent category exists
-    BazCore:RegisterOptionsTable("BNC", GetMainOptionsTable)
-    BazCore:AddToSettings("BNC", "BazNotificationCenter")
+    BazCore:RegisterOptionsTable("BazNotificationCenter", GetMainOptionsTable)
+    BazCore:AddToSettings("BazNotificationCenter", "BazNotificationCenter")
 
     -- Settings subcategory
-    BazCore:RegisterOptionsTable("BNC_Settings", GetSettingsOptionsTable)
-    BazCore:AddToSettings("BNC_Settings", "Settings", "BNC")
+    BazCore:RegisterOptionsTable("BazNotificationCenter-Settings", GetSettingsOptionsTable)
+    BazCore:AddToSettings("BazNotificationCenter-Settings", "Settings", "BazNotificationCenter")
 
     -- Modules subcategory
-    BazCore:RegisterOptionsTable("BNC_Modules", GetModulesOptionsTable)
-    BazCore:AddToSettings("BNC_Modules", "Modules", "BNC")
+    BazCore:RegisterOptionsTable("BazNotificationCenter-Modules", GetModulesOptionsTable)
+    BazCore:AddToSettings("BazNotificationCenter-Modules", "Modules", "BazNotificationCenter")
 
     -- Profiles subcategory
     if BazCore.GetProfileOptionsTable then
-        BazCore:RegisterOptionsTable("BNC_Profiles", function()
+        BazCore:RegisterOptionsTable("BazNotificationCenter-Profiles", function()
             return BazCore:GetProfileOptionsTable("BazNotificationCenter")
         end)
-        BazCore:AddToSettings("BNC_Profiles", "Profiles", "BNC")
+        BazCore:AddToSettings("BazNotificationCenter-Profiles", "Profiles", "BazNotificationCenter")
     end
 
     -- Now safe to create per-module pages
@@ -352,5 +352,5 @@ end)
 addon.Events:Register("PLAYER_READY", TryCreateAllPendingPages)
 
 function addon.OpenOptions()
-    BazCore:OpenOptionsPanel("BNC")
+    BazCore:OpenOptionsPanel("BazNotificationCenter")
 end
