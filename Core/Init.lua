@@ -37,7 +37,7 @@ local DEFAULTS = {
     tomtomEnabled = true,
     panelOpacity = 0.85,
     maxHistory = 999,
-    historyRetentionDays = 30,
+    historyRetentionDays = 7,
     scale = 1.0,
     dndEnabled = false,
     dndAutoCombat = false,
@@ -146,7 +146,7 @@ BazCore:RegisterAddon("BazNotificationCenter", {
 
         -- Trim persistent history at load to bound memory usage
         if addon.History_Trim then
-            local retention = addon.db.historyRetentionDays or 30
+            local retention = addon.db.historyRetentionDays or 7
             addon.History_Trim(retention)
         end
 

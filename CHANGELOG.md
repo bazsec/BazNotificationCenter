@@ -1,5 +1,9 @@
 # BazNotificationCenter Changelog
 
+## 015 - Retention Default to 7 Days
+- Lowered history retention default from 30 days to 7 days — notifications are inherently ephemeral and one week is plenty for "what happened recently"
+- Setting is still adjustable (1–90 days) for anyone who wants more
+
 ## 014 - History Retention
 - Added a retention policy for persistent notification history (default: 30 days)
 - Day buckets older than the retention window are pruned at login and after each new notification, so memory usage stays bounded instead of growing forever

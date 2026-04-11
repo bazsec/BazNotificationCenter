@@ -47,7 +47,7 @@ function addon.History_AppendEntries(entries)
     RebuildDayIndex()
 
     -- Trim on append so a long-running session doesn't grow unbounded
-    local retention = addon.db and addon.db.historyRetentionDays or 30
+    local retention = addon.db and addon.db.historyRetentionDays or 7
     addon.History_Trim(retention)
 end
 

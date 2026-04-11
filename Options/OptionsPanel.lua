@@ -110,7 +110,7 @@ local function GetSettingsOptionsTable()
                 name = "History Retention (Days)",
                 desc = "Persisted notification history older than this many days is pruned at login and after each new notification.",
                 min = 1, max = 90, step = 1,
-                get = function() return addon.db and addon.db.historyRetentionDays or 30 end,
+                get = function() return addon.db and addon.db.historyRetentionDays or 7 end,
                 set = function(_, val)
                     addon.SetDBValue("historyRetentionDays", val)
                     if addon.History_Trim then addon.History_Trim(val) end
