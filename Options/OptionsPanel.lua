@@ -104,6 +104,18 @@ local function GetSettingsOptionsTable()
                 get = function() return addon.db and addon.db.maxHistory or 999 end,
                 set = function(_, val) addon.SetDBValue("maxHistory", val) end,
             },
+            historyRetentionDays = {
+                order = 14.5,
+                type = "range",
+                name = "History Retention (Days)",
+                desc = "Persisted notification history older than this many days is pruned at login and after each new notification.",
+                min = 1, max = 90, step = 1,
+                get = function() return addon.db and addon.db.historyRetentionDays or 30 end,
+                set = function(_, val)
+                    addon.SetDBValue("historyRetentionDays", val)
+                    if addon.History_Trim then addon.History_Trim(val) end
+                end,
+            },
             toastsEnabled = {
                 order = 15,
                 type = "toggle",

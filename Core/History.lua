@@ -45,6 +45,10 @@ function addon.History_AppendEntries(entries)
     end
 
     RebuildDayIndex()
+
+    -- Trim on append so a long-running session doesn't grow unbounded
+    local retention = addon.db and addon.db.historyRetentionDays or 30
+    addon.History_Trim(retention)
 end
 
 function addon.History_GetDay(dateKey)
@@ -128,6 +132,33 @@ function addon.History_PurgeAll()
     if not history then return end
     wipe(history.days)
     wipe(history.dayIndex)
+end
+
+---------------------------------------------------------------------------
+-- Retention
+--
+-- Deletes day buckets older than `days` days ago. Called at login and
+-- after each append so memory usage stays bounded. Without this, the
+-- history table grows forever and can reach many MB.
+---------------------------------------------------------------------------
+
+function addon.History_Trim(days)
+    if not days or days <= 0 then return 0 end
+    local history = GetHistory()
+    if not history or not history.days then return 0 end
+
+    local cutoff = date("%Y-%m-%d", time() - days * 86400)
+    local removed = 0
+    for dateKey in pairs(history.days) do
+        if dateKey < cutoff then
+            history.days[dateKey] = nil
+            removed = removed + 1
+        end
+    end
+    if removed > 0 then
+        RebuildDayIndex()
+    end
+    return removed
 end
 
 function addon.History_GetModules()

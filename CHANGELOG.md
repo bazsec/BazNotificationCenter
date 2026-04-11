@@ -1,5 +1,11 @@
 # BazNotificationCenter Changelog
 
+## 014 - History Retention
+- Added a retention policy for persistent notification history (default: 30 days)
+- Day buckets older than the retention window are pruned at login and after each new notification, so memory usage stays bounded instead of growing forever
+- New "History Retention (Days)" range slider in the options page (1–90 days)
+- Fixes BNC memory climbing into the MBs after heavy use — prior versions never trimmed persistent history
+
 ## 013 - Unified Toast/Card Rendering
 - Toasts and notification cards now share a single body factory and populate helper
 - Toasts gained a module label in the bottom-right corner so you can see which addon emitted them

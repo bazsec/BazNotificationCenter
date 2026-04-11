@@ -37,6 +37,7 @@ local DEFAULTS = {
     tomtomEnabled = true,
     panelOpacity = 0.85,
     maxHistory = 999,
+    historyRetentionDays = 30,
     scale = 1.0,
     dndEnabled = false,
     dndAutoCombat = false,
@@ -142,6 +143,12 @@ BazCore:RegisterAddon("BazNotificationCenter", {
         -- Flatten the db proxy: addon.db.X reads directly from active profile
         addon.db = self.db.profile
         addon.bncAddon = self
+
+        -- Trim persistent history at load to bound memory usage
+        if addon.History_Trim then
+            local retention = addon.db.historyRetentionDays or 30
+            addon.History_Trim(retention)
+        end
 
         -- Register PLAYER_ENTERING_WORLD to bridge to internal PLAYER_READY
         self:On("PLAYER_ENTERING_WORLD", function(event, isLogin, isReload)
