@@ -32,16 +32,28 @@ local function OnVignetteAdded(event, vignetteGUID)
     local dedupeKey = vignetteID or vignetteGUID
     if vignetteDedup:IsDuplicate(dedupeKey) then return end
 
-    -- SafeMatch guards against tainted vignette atlas strings
-    local isRare = BNC.SafeMatch(atlasName, "vignettekill") or BNC.SafeMatch(atlasName, "vignetteelite")
-    local isTreasure = BNC.SafeMatch(atlasName, "vignetteloot") or BNC.SafeMatch(atlasName, "vignetteevent")
-    local isEvent = BNC.SafeMatch(atlasName, "vignetteevent")
+    if vignetteInfo.isDead then return end
+
+    -- Lowercase the atlas once (also launders any taint) so our whitelist
+    -- checks below are case-insensitive. Real atlas names are CamelCase
+    -- like "VignetteKill", "VignetteLoot", "Vignette-MissionNPC", etc.
+    local atlas = BNC.SafeLower(atlasName)
+    if not atlas or atlas == "" then return end
+
+    -- Whitelist the vignette categories we care about. Anything else
+    -- (mission NPCs, vendors, quest markers, minor vignettes, etc.) is
+    -- silently dropped — otherwise every weird vignette in Silvermoon
+    -- shows up as a "Rare Spawn".
+    local isEvent    = string.find(atlas, "vignetteevent", 1, true) ~= nil
+    local isTreasure = string.find(atlas, "vignetteloot",  1, true) ~= nil
+    local isRare     = string.find(atlas, "vignettekill",  1, true) ~= nil
+                    or string.find(atlas, "vignetteboss",  1, true) ~= nil
+
+    if not (isEvent or isTreasure or isRare) then return end
 
     local icon = ICON_RARE
     local title = "Rare Spawn"
     local priority = "high"
-
-    if vignetteInfo.isDead then return end
 
     if isEvent then
         if GetSetting("showEvents") == false then return end
@@ -55,7 +67,7 @@ local function OnVignetteAdded(event, vignetteGUID)
         priority = "normal"
     else
         if GetSetting("showRares") == false then return end
-        if BNC.SafeMatch(atlasName, "elite") then
+        if string.find(atlas, "elite", 1, true) or string.find(atlas, "boss", 1, true) then
             icon = ICON_RARE_ELITE
             title = "Rare Elite"
         end

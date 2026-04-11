@@ -1,10 +1,19 @@
 local addonName, addon = ...
 
 local Colors = addon.Colors
+
+---------------------------------------------------------------------------
+-- Shared body metrics (used by both NotificationCard and Toast)
+---------------------------------------------------------------------------
+
+local BODY_PADDING = 8
+local BODY_ICON_SIZE = 28
+local TITLE_MESSAGE_GAP = 4
+
+-- Card-specific metrics
 local CARD_WIDTH = 290
-local CARD_PADDING = 8
-local ICON_SIZE = 28
 local CARD_MIN_HEIGHT = 48
+local TIMESTAMP_RESERVED_WIDTH = 90  -- right-side space reserved for timestamp column
 
 local BACKDROP_CARD = {
     bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -12,6 +21,161 @@ local BACKDROP_CARD = {
     edgeSize = 1,
     insets = { left = 1, right = 1, top = 1, bottom = 1 },
 }
+
+---------------------------------------------------------------------------
+-- Shared notification body factory
+--
+-- Creates the visual elements common to cards and toasts:
+--   icon, moduleLabel, title, message, priorityBar
+--
+-- Both panel cards and floating toasts call this so any future layout
+-- change only has to happen in one place.
+--
+-- The moduleLabel is created on every body but stays hidden by default.
+-- Toasts show it inline (they have no group header above them); cards
+-- leave it hidden because the module is already shown by GroupHeader.
+---------------------------------------------------------------------------
+
+function addon.CreateNotificationBody(frame)
+    -- Icon
+    frame.icon = frame:CreateTexture(nil, "ARTWORK")
+    frame.icon:SetSize(BODY_ICON_SIZE, BODY_ICON_SIZE)
+    frame.icon:SetPoint("TOPLEFT", frame, "TOPLEFT", BODY_PADDING, -BODY_PADDING)
+    frame.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+    -- Module label (bottom-right corner — identifies source addon on toasts
+    -- without displacing the title. Hidden on cards since the GroupHeader
+    -- already shows the module name above them.)
+    frame.moduleLabel = frame:CreateFontString(nil, "OVERLAY")
+    frame.moduleLabel:SetFontObject(GameFontNormalSmall)
+    frame.moduleLabel:SetTextColor(unpack(Colors.textMuted))
+    frame.moduleLabel:SetJustifyH("RIGHT")
+    frame.moduleLabel:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -BODY_PADDING, BODY_PADDING)
+    frame.moduleLabel:Hide()
+
+    -- Title — always anchored to the top-right of the icon
+    frame.title = frame:CreateFontString(nil, "OVERLAY")
+    frame.title:SetFontObject(GameFontNormal)
+    frame.title:SetTextColor(unpack(Colors.textPrimary))
+    frame.title:SetJustifyH("LEFT")
+    frame.title:SetWordWrap(true)
+    frame.title:SetPoint("TOPLEFT", frame.icon, "TOPRIGHT", 6, 0)
+    frame.title:SetPoint("RIGHT", frame, "RIGHT", -BODY_PADDING, 0)
+
+    -- Message (full-width row below the icon/title block)
+    frame.message = frame:CreateFontString(nil, "OVERLAY")
+    frame.message:SetFontObject(GameFontHighlightSmall)
+    frame.message:SetTextColor(unpack(Colors.textSecondary))
+    frame.message:SetJustifyH("LEFT")
+    frame.message:SetWordWrap(true)
+    frame.message:SetPoint("TOPLEFT", frame, "TOPLEFT",
+        BODY_PADDING, -(BODY_PADDING + BODY_ICON_SIZE + TITLE_MESSAGE_GAP))
+    frame.message:SetPoint("RIGHT", frame, "RIGHT", -BODY_PADDING, 0)
+
+    -- Priority accent bar (left edge)
+    frame.priorityBar = frame:CreateTexture(nil, "OVERLAY")
+    frame.priorityBar:SetSize(2, 1)
+    frame.priorityBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -1)
+    frame.priorityBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 1)
+    frame.priorityBar:Hide()
+end
+
+---------------------------------------------------------------------------
+-- Shared populate helper
+--
+-- Fills a card/toast body with data from a notification and returns the
+-- calculated total height. Options:
+--   opts.showModuleLabel      — show addon-name row above title (toasts)
+--   opts.rightReservedWidth   — pixels to reserve on the right of the top
+--                               row (e.g. for a card's timestamp column)
+---------------------------------------------------------------------------
+
+function addon.PopulateNotification(frame, notifData, width, opts)
+    opts = opts or {}
+
+    -- Icon
+    if notifData.icon then
+        frame.icon:SetTexture(notifData.icon)
+        frame.icon:Show()
+    else
+        frame.icon:Hide()
+    end
+
+    -- Module label (bottom-right). Doesn't displace the title row.
+    local labelWidth = 0
+    if opts.showModuleLabel then
+        local moduleName
+        if notifData.module and addon.modules and addon.modules[notifData.module] then
+            moduleName = addon.modules[notifData.module].name
+        end
+        if moduleName and moduleName ~= "" then
+            frame.moduleLabel:SetText(moduleName)
+            frame.moduleLabel:Show()
+            labelWidth = frame.moduleLabel:GetStringWidth() or 0
+        else
+            frame.moduleLabel:Hide()
+        end
+    else
+        frame.moduleLabel:Hide()
+    end
+
+    -- Text
+    frame.title:SetText(notifData.title or "")
+    frame.message:SetText(notifData.message or "")
+
+    -- Priority accent
+    if notifData.priority == "high" then
+        frame.priorityBar:SetColorTexture(unpack(Colors.priorityHigh))
+        frame.priorityBar:Show()
+    elseif notifData.priority == "low" then
+        frame.priorityBar:SetColorTexture(unpack(Colors.priorityLow))
+        frame.priorityBar:Show()
+    else
+        frame.priorityBar:Hide()
+    end
+
+    -- Top row width (title): reserve for right-side timestamp column on cards
+    local topRowRightReserve = opts.rightReservedWidth or BODY_PADDING
+    local topRowWidth = width - BODY_PADDING - BODY_ICON_SIZE - 6 - topRowRightReserve
+    frame.title:SetWidth(topRowWidth)
+
+    -- Message row width: reserve space on the right if the module label is
+    -- visible in that corner, so they don't overlap.
+    local messageRightReserve = BODY_PADDING
+    if labelWidth > 0 then
+        messageRightReserve = BODY_PADDING + labelWidth + 8
+    end
+    frame.message:SetWidth(width - BODY_PADDING - messageRightReserve)
+
+    -- Height calculation
+    local titleHeight = frame.title:GetStringHeight() or 14
+    local msgHeight = frame.message:GetStringHeight() or 0
+    local hasMessage = notifData.message and notifData.message ~= ""
+
+    local iconRegionHeight = math.max(BODY_ICON_SIZE, titleHeight)
+
+    -- Reposition message below the icon/title block
+    frame.message:ClearAllPoints()
+    frame.message:SetPoint("TOPLEFT", frame, "TOPLEFT",
+        BODY_PADDING, -(BODY_PADDING + iconRegionHeight + TITLE_MESSAGE_GAP))
+    frame.message:SetPoint("RIGHT", frame, "RIGHT", -messageRightReserve, 0)
+
+    local totalHeight = BODY_PADDING + iconRegionHeight
+        + (hasMessage and (TITLE_MESSAGE_GAP + msgHeight) or 0)
+        + BODY_PADDING
+
+    -- If the module label is shown but there's no message, reserve a row
+    -- below the icon/title block so the label has somewhere to sit.
+    if labelWidth > 0 and not hasMessage then
+        totalHeight = totalHeight + TITLE_MESSAGE_GAP + 12
+    end
+
+    return totalHeight
+end
+
+---------------------------------------------------------------------------
+-- Notification Card (panel)
+---------------------------------------------------------------------------
 
 local function CreateCard(index)
     local card = CreateFrame("Button", "BNCCard" .. index, UIParent, "BackdropTemplate")
@@ -23,46 +187,17 @@ local function CreateCard(index)
     card:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     card:Hide()
 
-    -- Icon
-    card.icon = card:CreateTexture(nil, "ARTWORK")
-    card.icon:SetSize(ICON_SIZE, ICON_SIZE)
-    card.icon:SetPoint("TOPLEFT", card, "TOPLEFT", CARD_PADDING, -CARD_PADDING)
-    card.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    -- Shared body: icon, moduleLabel, title, message, priorityBar
+    addon.CreateNotificationBody(card)
 
-    -- Title
-    card.title = card:CreateFontString(nil, "OVERLAY")
-    card.title:SetFontObject(GameFontNormal)
-    card.title:SetTextColor(unpack(Colors.textPrimary))
-    card.title:SetJustifyH("LEFT")
-    card.title:SetPoint("TOPLEFT", card.icon, "TOPRIGHT", 6, 0)
-    card.title:SetPoint("RIGHT", card, "RIGHT", -28, 0)
-    card.title:SetWordWrap(true)
-
-    -- Timestamp
+    -- Timestamp (card-only, top-right)
     card.timestamp = card:CreateFontString(nil, "OVERLAY")
     card.timestamp:SetFontObject(GameFontNormalSmall)
     card.timestamp:SetTextColor(unpack(Colors.textMuted))
     card.timestamp:SetJustifyH("RIGHT")
-    card.timestamp:SetPoint("TOPRIGHT", card, "TOPRIGHT", -CARD_PADDING, -CARD_PADDING)
+    card.timestamp:SetPoint("TOPRIGHT", card, "TOPRIGHT", -BODY_PADDING, -BODY_PADDING)
 
-    -- Message
-    card.message = card:CreateFontString(nil, "OVERLAY")
-    card.message:SetFontObject(GameFontHighlightSmall)
-    card.message:SetTextColor(unpack(Colors.textSecondary))
-    card.message:SetJustifyH("LEFT")
-    card.message:SetWordWrap(true)
-    card.message:SetPoint("TOPLEFT", card.icon, "BOTTOMLEFT", 0, -4)
-    card.message:SetPoint("RIGHT", card, "RIGHT", -CARD_PADDING, 0)
-
-    -- Priority accent bar (left edge)
-    card.priorityBar = card:CreateTexture(nil, "OVERLAY")
-    card.priorityBar:SetSize(2, 1)
-    card.priorityBar:SetPoint("TOPLEFT", card, "TOPLEFT", 0, -1)
-    card.priorityBar:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT", 0, 1)
-    card.priorityBar:SetColorTexture(unpack(Colors.accent))
-    card.priorityBar:Hide()
-
-    -- Dismiss button
+    -- Dismiss button (card-only)
     card.dismissBtn = CreateFrame("Button", nil, card)
     card.dismissBtn:SetSize(16, 16)
     card.dismissBtn:SetPoint("TOPRIGHT", card, "TOPRIGHT", -4, -4)
@@ -90,7 +225,6 @@ local function CreateCard(index)
     card:SetScript("OnEnter", function(self)
         self:SetBackdropColor(unpack(Colors.cardHover))
         self.dismissBtn:Show()
-        -- Show item tooltip if this notification has an itemLink
         if self.itemLink then
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:SetHyperlink(self.itemLink)
@@ -105,7 +239,7 @@ local function CreateCard(index)
         end
     end)
 
-    -- Click handler: ctrl-click for dressing room, shift-click to link in chat
+    -- Click handler: ctrl-click dressing room, shift-click link, else waypoint/onClick
     card:SetScript("OnClick", function(self, button)
         if button == "RightButton" then
             if self.notificationId then
@@ -113,7 +247,6 @@ local function CreateCard(index)
             end
             return
         end
-        -- Item link interactions
         if self.itemLink then
             if IsControlKeyDown() then
                 DressUpItemLink(self.itemLink)
@@ -157,48 +290,20 @@ function addon.SetupCard(card, notifData)
     card.waypointData = notifData.waypoint
     card.itemLink = notifData.itemLink
 
-    -- Icon
-    if notifData.icon then
-        card.icon:SetTexture(notifData.icon)
-        card.icon:Show()
-    else
-        card.icon:Hide()
-    end
+    local totalHeight = addon.PopulateNotification(card, notifData, CARD_WIDTH, {
+        showModuleLabel = false,
+        rightReservedWidth = TIMESTAMP_RESERVED_WIDTH,
+    })
+    card:SetHeight(math.max(CARD_MIN_HEIGHT, totalHeight))
 
-    -- Text
-    card.title:SetText(notifData.title)
-    card.message:SetText(notifData.message)
-    -- Show time + relative time (e.g. "14:30 - 2m ago")
+    -- Timestamp
     local timeStr = addon.FormatRelativeTime(notifData.timestamp)
     if notifData.realTime then
         timeStr = addon.FormatCardTimestamp(notifData.realTime) .. " - " .. timeStr
     end
     card.timestamp:SetText(timeStr)
-
-    -- Store timestamps for refresh
     card.notifTimestamp = notifData.timestamp
     card.notifRealTime = notifData.realTime
-
-    -- Priority accent
-    if notifData.priority == "high" then
-        card.priorityBar:SetColorTexture(unpack(Colors.priorityHigh))
-        card.priorityBar:Show()
-    elseif notifData.priority == "low" then
-        card.priorityBar:SetColorTexture(unpack(Colors.priorityLow))
-        card.priorityBar:Show()
-    else
-        card.priorityBar:Hide()
-    end
-
-    -- Calculate height based on title and message text
-    card.title:SetWidth(CARD_WIDTH - CARD_PADDING - ICON_SIZE - 6 - 28)
-    local titleHeight = card.title:GetStringHeight() or 14
-    card.message:SetWidth(CARD_WIDTH - CARD_PADDING * 2)
-    local msgHeight = card.message:GetStringHeight() or 0
-    local hasMessage = notifData.message and notifData.message ~= ""
-    local contentHeight = math.max(ICON_SIZE, titleHeight)
-    local totalHeight = CARD_PADDING + contentHeight + (hasMessage and (4 + msgHeight) or 0) + CARD_PADDING
-    card:SetHeight(math.max(CARD_MIN_HEIGHT, totalHeight))
 
     return card
 end

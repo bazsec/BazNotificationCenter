@@ -1,5 +1,13 @@
 # BazNotificationCenter Changelog
 
+## 013 - Unified Toast/Card Rendering
+- Toasts and notification cards now share a single body factory and populate helper
+- Toasts gained a module label in the bottom-right corner so you can see which addon emitted them
+- Fixed Rares module firing on vendors, mission NPCs, and other non-rare vignettes
+  - Atlas matching was case-sensitive so the existing whitelist never matched — everything fell through to "Rare Spawn"
+  - Now lowercases the atlas first and uses an explicit whitelist (VignetteKill, VignetteLoot, VignetteEvent, VignetteBoss)
+- Message rows now correctly re-flow when the module label or a long title would overlap
+
 ## 012 - Unified Profiles
 - Profiles now managed centrally in BazCore settings
 - Removed per-addon Profiles subcategory
