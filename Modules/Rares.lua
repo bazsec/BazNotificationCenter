@@ -74,17 +74,15 @@ local function OnVignetteAdded(event, vignetteGUID)
     end
 
     local waypointData = nil
-    local vignettePos = C_VignetteInfo.GetVignettePosition(vignetteGUID, C_Map.GetBestMapForUnit("player"))
-    if vignettePos then
-        local mapID = C_Map.GetBestMapForUnit("player")
-        if mapID then
-            waypointData = {
-                mapID = mapID,
-                x = vignettePos.x,
-                y = vignettePos.y,
-                title = (name or "Unknown") .. " (" .. title .. ")",
-            }
-        end
+    local mapID = C_Map.GetBestMapForUnit("player")
+    local vignettePos = mapID and C_VignetteInfo.GetVignettePosition(vignetteGUID, mapID)
+    if vignettePos and mapID then
+        waypointData = {
+            mapID = mapID,
+            x = vignettePos.x,
+            y = vignettePos.y,
+            title = (name or "Unknown") .. " (" .. title .. ")",
+        }
     end
 
     local message = name or "Unknown"

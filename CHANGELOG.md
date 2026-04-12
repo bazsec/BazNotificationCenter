@@ -1,5 +1,9 @@
 # BazNotificationCenter Changelog
 
+## 016 - Fix Rares Module Nil Map Error
+- Fixed "bad argument #2 to 'GetVignettePosition'" error in the Rares module when `C_Map.GetBestMapForUnit("player")` returns nil (during loading screens, phasing, or certain instances)
+- MapID is now fetched once and nil-checked before passing to `C_VignetteInfo.GetVignettePosition`; if nil, the vignette position lookup is skipped gracefully
+
 ## 015 - Retention Default to 7 Days
 - Lowered history retention default from 30 days to 7 days — notifications are inherently ephemeral and one week is plenty for "what happened recently"
 - Setting is still adjustable (1–90 days) for anyone who wants more
