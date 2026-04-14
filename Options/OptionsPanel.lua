@@ -49,6 +49,11 @@ local function GetSettingsOptionsTable()
         name = "Settings",
         type = "group",
         args = {
+            intro = {
+                order = 0.1,
+                type = "lead",
+                text = "Where notifications appear, how long they stay, and how the history panel behaves. Per-module on/off lives under Modules.",
+            },
             positionHeader = {
                 order = 1,
                 type = "header",
@@ -141,6 +146,12 @@ local function GetSettingsOptionsTable()
                 order = 20,
                 type = "header",
                 name = "Do Not Disturb",
+            },
+            dndIntro = {
+                order = 20.5,
+                type = "note",
+                style = "tip",
+                text = "DND mode silences toast popups and sounds without losing notifications — they still appear in the history panel for review.",
             },
             dndEnabled = {
                 order = 21,
