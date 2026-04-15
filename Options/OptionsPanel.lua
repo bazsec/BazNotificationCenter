@@ -399,11 +399,11 @@ addon.Events:Register("CORE_LOADED", function()
 
     -- Settings subcategory
     BazCore:RegisterOptionsTable("BazNotificationCenter-Settings", GetSettingsOptionsTable)
-    BazCore:AddToSettings("BazNotificationCenter-Settings", "Settings", "BazNotificationCenter")
+    BazCore:AddToSettings("BazNotificationCenter-Settings", "General Settings", "BazNotificationCenter")
 
     -- Global Options subcategory
     BazCore:RegisterOptionsTable("BazNotificationCenter-GlobalOptions", GetGlobalOptionsTable)
-    BazCore:AddToSettings("BazNotificationCenter-GlobalOptions", "Global Options", "BazNotificationCenter")
+    BazCore:AddToSettings("BazNotificationCenter-GlobalOptions", "Global Settings", "BazNotificationCenter")
 
     -- Modules subcategory
     BazCore:RegisterOptionsTable("BazNotificationCenter-Modules", GetModulesOptionsTable)
