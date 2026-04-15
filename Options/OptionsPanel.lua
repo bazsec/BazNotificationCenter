@@ -208,33 +208,22 @@ local function GetSettingsOptionsTable()
 end
 
 ---------------------------------------------------------------------------
--- Modules Subcategory (enable/disable toggles)
+-- Modules Subcategory — list/detail panel
+-- One unified page with a list of modules on the left and the selected
+-- module's enable toggle + settings on the right. Same shape BWD's
+-- Drawers / Widgets sub-categories use.
 ---------------------------------------------------------------------------
 
-local function GetModulesOptionsTable()
+-- Build the args table for one module's detail panel: enable toggle on
+-- top, then any module-specific options registered via the option-defs
+-- system. Shared with the (now-deprecated) per-module pages below.
+local function BuildModuleArgs(moduleId)
     local args = {
-        desc = {
+        enabled = {
             order = 1,
-            type = "description",
-            name = "Enable or disable notification modules. Each module has its own settings in its sub-tab.",
-        },
-    }
-
-    -- Sort modules alphabetically
-    local sorted = {}
-    for id, module in pairs(addon.modules) do
-        if id ~= "_test" then
-            table.insert(sorted, { id = id, name = module.name })
-        end
-    end
-    table.sort(sorted, function(a, b) return a.name < b.name end)
-
-    for i, info in ipairs(sorted) do
-        local moduleId = info.id
-        args["mod_" .. moduleId] = {
-            order = 10 + i,
             type = "toggle",
-            name = info.name,
+            name = "Enable Module",
+            desc = "Toggle this module's notifications on or off.",
             get = function()
                 if not addon.db then return true end
                 local settings = addon.db.modules[moduleId]
@@ -248,13 +237,101 @@ local function GetModulesOptionsTable()
                 addon.db.modules[moduleId].enabled = val
                 addon.Events:Trigger("MODULE_TOGGLED", moduleId, val)
             end,
+        },
+    }
+
+    local optDefs = addon.moduleOptionDefs and addon.moduleOptionDefs[moduleId]
+    if optDefs then
+        -- Header before the per-module options so it's visually grouped
+        args._optsHeader = {
+            order = 5,
+            type = "header",
+            name = "Module Settings",
+        }
+        for i, optDef in ipairs(optDefs) do
+            local key = optDef.key
+            local default = optDef.default
+            local disabledFunc = function()
+                return BNC:IsGlobalOverrideActive(key)
+            end
+            if optDef.type == "toggle" then
+                args[key] = {
+                    order = 10 + i,
+                    type = "toggle",
+                    name = optDef.label,
+                    get = function()
+                        local val = BNC:GetModuleSetting(moduleId, key)
+                        if val == nil then return default ~= false end
+                        return val ~= false
+                    end,
+                    set = function(_, val)
+                        BNC:SetModuleSetting(moduleId, key, val)
+                    end,
+                    disabled = disabledFunc,
+                }
+            elseif optDef.type == "slider" then
+                args[key] = {
+                    order = 10 + i,
+                    type = "range",
+                    name = optDef.label,
+                    min = optDef.min or 1,
+                    max = optDef.max or 15,
+                    step = optDef.step or 1,
+                    get = function()
+                        local val = BNC:GetModuleSetting(moduleId, key)
+                        if val == nil then return default or optDef.min or 1 end
+                        return val
+                    end,
+                    set = function(_, val)
+                        BNC:SetModuleSetting(moduleId, key, val)
+                    end,
+                    disabled = disabledFunc,
+                }
+            end
+        end
+    end
+
+    return args
+end
+
+local function GetModulesOptionsTable()
+    -- Sort modules alphabetically
+    local sorted = {}
+    for id, module in pairs(addon.modules) do
+        if id ~= "_test" then
+            table.insert(sorted, { id = id, name = module.name })
+        end
+    end
+    table.sort(sorted, function(a, b) return a.name < b.name end)
+
+    -- Build one child group per module so BazCore's CreateTwoPanelLayout
+    -- renders a list/detail panel automatically.
+    local moduleGroups = {}
+    for i, info in ipairs(sorted) do
+        moduleGroups["mod_" .. info.id] = {
+            order = i,
+            type = "group",
+            name = info.name,
+            args = BuildModuleArgs(info.id),
         }
     end
 
     return {
         name = "Modules",
         type = "group",
-        args = args,
+        args = {
+            intro = {
+                order = 0.1,
+                type = "lead",
+                text = "Pick a module on the left to enable/disable it and adjust its specific settings. Each module captures a different category of game events.",
+            },
+            modules = {
+                order = 10,
+                type = "group",
+                name = "",
+                args = moduleGroups,
+            },
+        },
     }
 end
 
@@ -289,74 +366,16 @@ end
 -- Per-Module Settings Subcategory
 ---------------------------------------------------------------------------
 
+-- Per-module sub-categories are no longer separate sidebar entries —
+-- everything lives inside the unified Modules list/detail page now.
+-- This stub stays so the "create on module register" event chain still
+-- has something to call; it just refreshes the Modules page.
 local function CreateModuleOptionsPage(moduleId)
-    local module = addon.modules[moduleId]
-    if not module then return end
-
-    local optDefs = addon.moduleOptionDefs[moduleId]
-    if not optDefs then return end
-
-    if moduleSubCategories[moduleId] then return end
-
-    local function GetModuleOptionsTable()
-        local args = {}
-
-        for i, optDef in ipairs(optDefs) do
-            local key = optDef.key
-            local default = optDef.default
-
-            -- Disable widget when a global override is active for this key
-            local disabledFunc = function()
-                return BNC:IsGlobalOverrideActive(key)
-            end
-
-            if optDef.type == "toggle" then
-                args[key] = {
-                    order = i,
-                    type = "toggle",
-                    name = optDef.label,
-                    get = function()
-                        local val = BNC:GetModuleSetting(moduleId, key)
-                        if val == nil then return default ~= false end
-                        return val ~= false
-                    end,
-                    set = function(_, val)
-                        BNC:SetModuleSetting(moduleId, key, val)
-                    end,
-                    disabled = disabledFunc,
-                }
-            elseif optDef.type == "slider" then
-                args[key] = {
-                    order = i,
-                    type = "range",
-                    name = optDef.label,
-                    min = optDef.min or 1,
-                    max = optDef.max or 15,
-                    step = optDef.step or 1,
-                    get = function()
-                        local val = BNC:GetModuleSetting(moduleId, key)
-                        if val == nil then return default or optDef.min or 1 end
-                        return val
-                    end,
-                    set = function(_, val)
-                        BNC:SetModuleSetting(moduleId, key, val)
-                    end,
-                    disabled = disabledFunc,
-                }
-            end
-        end
-
-        return {
-            name = module.name,
-            type = "group",
-            args = args,
-        }
-    end
-
-    BazCore:RegisterOptionsTable("BazNotificationCenter-" .. moduleId, GetModuleOptionsTable)
-    BazCore:AddToSettings("BazNotificationCenter-" .. moduleId, module.name, "BazNotificationCenter")
-
+    if not addon.modules[moduleId] then return end
     moduleSubCategories[moduleId] = true
+    if BazCore.RefreshOptions then
+        BazCore:RefreshOptions("BazNotificationCenter-Modules")
+    end
 end
 
 ---------------------------------------------------------------------------
