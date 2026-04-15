@@ -14,16 +14,18 @@ local addonName, addon = ...
 
 local function Detaint(str)
     if str == nil then return nil end
-    -- forceinsecure tells the taint system to ignore taint for this call
-    if forceinsecure then
-        forceinsecure()
-    end
-    -- Concatenation with "" forces a new string allocation that may strip taint
-    local ok, result = pcall(tostring, str)
-    if ok then return result end
-    -- Last resort: try securecallfunction
+    -- The Midnight-correct pattern: string.format("%s", val) forces a
+    -- fresh allocation that strips secret-string taint. tostring alone
+    -- does NOT strip it. pcall guards against any residual error path.
+    local ok, result = pcall(string.format, "%s", str)
+    if ok and result then return result end
+    -- Fallback for non-secret tainted strings
+    if forceinsecure then forceinsecure() end
+    ok, result = pcall(tostring, str)
+    if ok and result then return result end
+    -- Final resort
     ok, result = pcall(securecallfunction, tostring, str)
-    if ok then return result end
+    if ok and result then return result end
     return nil
 end
 
