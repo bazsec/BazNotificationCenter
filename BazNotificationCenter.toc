@@ -1,8 +1,8 @@
-## Interface: 120001
+## Interface: 120005
 ## Title: BazNotificationCenter
 ## Notes: A modern, polished notification center for World of Warcraft.
 ## Author: Baz4k
-## Version: 021
+## Version: 022
 ## X-License: GPL v2
 ## X-Curse-Project-ID: 1498445
 ## Dependencies: BazCore
