@@ -52,3 +52,24 @@ function addon.AnchorToCorner(frame, position, xOffset, yOffset)
     frame:ClearAllPoints()
     frame:SetPoint(data.point, UIParent, data.relPoint, mx, my)
 end
+
+-- Given an arbitrary frame, return the corner key
+-- (TOPLEFT/TOPRIGHT/BOTTOMLEFT/BOTTOMRIGHT) that best matches the
+-- frame's screen position. Used to pick a sensible toast growth and
+-- panel anchor direction once the user moves the bell freely via
+-- Edit Mode — we still want toasts to stack toward screen-center
+-- and the panel to fall on the inside of the bell rather than off
+-- the screen edge.
+function addon.DerivePositionForFrame(frame)
+    if not frame then return "TOPLEFT" end
+    local cx, cy = frame:GetCenter()
+    if not cx or not cy then return "TOPLEFT" end
+    local screenW = UIParent:GetWidth()
+    local screenH = UIParent:GetHeight()
+    local left = cx <= screenW / 2
+    local top  = cy >= screenH / 2
+    if top and left then return "TOPLEFT" end
+    if top and not left then return "TOPRIGHT" end
+    if not top and left then return "BOTTOMLEFT" end
+    return "BOTTOMRIGHT"
+end

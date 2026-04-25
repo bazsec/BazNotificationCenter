@@ -23,6 +23,7 @@ local function CreateToggleButton()
     button:SetFrameStrata("HIGH")
     button:SetFrameLevel(100)
     button:SetClampedToScreen(true)
+    button:SetMovable(true)  -- BazCore Edit Mode handles drag wiring
     button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
     -- Bell icon
@@ -106,26 +107,97 @@ local function UpdateBadge()
     end
 end
 
-local function ReanchorButton()
+---------------------------------------------------------------------------
+-- Position handling
+--
+-- The bell is the single movable frame for BNC. The notification panel
+-- always anchors to the bell, and toast/panel growth direction comes
+-- from a derived corner (which screen quadrant the bell sits in).
+--
+-- - bellAnchor saved → restore that absolute position on load.
+-- - bellAnchor nil   → fall back to the default TOPLEFT margin.
+--
+-- After any (re)anchor, the derived position is recomputed so toasts
+-- and the panel slide/grow toward screen-center rather than off-edge.
+---------------------------------------------------------------------------
+
+local function RecomputeDerivedPosition()
     if not button or not addon.db then return end
-    addon.AnchorToCorner(button, addon.db.position)
+    local derived = addon.DerivePositionForFrame(button)
+    if derived ~= addon.db.position then
+        addon.db.position = derived
+        addon.Events:Trigger("SETTING_CHANGED_position", derived)
+    end
+end
+
+local function ApplyButtonPosition()
+    if not button or not addon.db then return end
+
+    button:ClearAllPoints()
+    local saved = addon.db.bellAnchor
+    if saved and saved.point then
+        button:SetPoint(
+            saved.point,
+            UIParent,
+            saved.relPoint or saved.point,
+            saved.x or 0,
+            saved.y or 0
+        )
+    else
+        addon.AnchorToCorner(button, addon.db.position or "TOPLEFT")
+    end
+
+    RecomputeDerivedPosition()
+end
+
+local function RegisterWithEditMode()
+    if not button or not BazCore or not BazCore.RegisterEditModeFrame then return end
+    if button._editModeRegistered then return end
+
+    BazCore:RegisterEditModeFrame(button, {
+        label = "Notification Bell",
+        addonName = "BazNotificationCenter",
+        positionKey = false,  -- We persist manually so we can also re-derive position
+        onPositionChanged = function()
+            local point, _, relPoint, x, y = button:GetPoint()
+            if point and addon.db then
+                addon.db.bellAnchor = {
+                    point    = point,
+                    relPoint = relPoint,
+                    x        = x or 0,
+                    y        = y or 0,
+                }
+            end
+            RecomputeDerivedPosition()
+        end,
+    })
+
+    button._editModeRegistered = true
 end
 
 function addon.GetToggleButton()
     return button
 end
 
+-- Public: clear the saved bell position and snap back to the default
+-- TOPLEFT corner. Called from the options page "Reset Bell Position".
+function addon.ResetBellPosition()
+    if not addon.db then return end
+    addon.db.bellAnchor = nil
+    ApplyButtonPosition()
+end
+
 -- Event listeners
 addon.Events:Register("CORE_LOADED", function()
     CreateToggleButton()
-    ReanchorButton()
+    ApplyButtonPosition()
+    RegisterWithEditMode()
     UpdateBadge()
 end)
 
 addon.Events:Register("NOTIFICATION_ADDED", UpdateBadge)
 addon.Events:Register("NOTIFICATION_DISMISSED", UpdateBadge)
 addon.Events:Register("NOTIFICATIONS_CLEARED", UpdateBadge)
-addon.Events:Register("SETTING_CHANGED_position", ReanchorButton)
 addon.Events:Register("SETTING_CHANGED_scale", function(scale)
     if button then
         button:SetScale(scale or 1)

@@ -30,7 +30,15 @@ end
 ---------------------------------------------------------------------------
 
 local DEFAULTS = {
+    -- Derived corner — recomputed automatically from the bell's actual
+    -- screen position. Stored so the rest of the addon (toast growth,
+    -- panel anchor side, header layout) can read a single value.
+    -- Users no longer pick this directly; they drag the bell in
+    -- Edit Mode and this updates to match.
     position = "TOPLEFT",
+    -- User-saved bell position from Edit Mode dragging. nil = use the
+    -- legacy corner default (TOPLEFT margin).
+    bellAnchor = nil,
     toastDuration = 5,
     toastsEnabled = true,
     soundEnabled = true,

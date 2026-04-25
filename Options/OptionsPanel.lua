@@ -57,20 +57,22 @@ local function GetSettingsOptionsTable()
             positionHeader = {
                 order = 1,
                 type = "header",
-                name = "Panel Position",
+                name = "Bell Position",
             },
-            position = {
+            positionNote = {
                 order = 2,
-                type = "select",
-                name = "Screen Corner",
-                values = {
-                    TOPLEFT = "Top Left",
-                    TOPRIGHT = "Top Right",
-                    BOTTOMLEFT = "Bottom Left",
-                    BOTTOMRIGHT = "Bottom Right",
-                },
-                get = function() return addon.db and addon.db.position or "TOPLEFT" end,
-                set = function(_, val) addon.SetDBValue("position", val) end,
+                type = "note",
+                style = "info",
+                text = "Move the bell icon by entering Edit Mode. The notification panel and toasts always anchor to the bell, and the panel/toast growth direction is chosen automatically based on which screen corner the bell is closest to.",
+            },
+            resetBellPosition = {
+                order = 3,
+                type = "execute",
+                name = "Reset Bell Position",
+                desc = "Snap the bell back to the top-left corner.",
+                func = function()
+                    if addon.ResetBellPosition then addon.ResetBellPosition() end
+                end,
             },
             displayHeader = {
                 order = 10,
