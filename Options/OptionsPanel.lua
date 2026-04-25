@@ -65,13 +65,24 @@ local function GetSettingsOptionsTable()
                 style = "info",
                 text = "Move the bell icon by entering Edit Mode. The notification panel and toasts always anchor to the bell, and the panel/toast growth direction is chosen automatically based on which screen corner the bell is closest to.",
             },
-            resetBellPosition = {
+            resetBellTopLeft = {
                 order = 3,
                 type = "execute",
-                name = "Reset Bell Position",
+                name = "Reset to Top Left",
                 desc = "Snap the bell back to the top-left corner.",
+                width = "half",
                 func = function()
-                    if addon.ResetBellPosition then addon.ResetBellPosition() end
+                    if addon.ResetBellPosition then addon.ResetBellPosition("TOPLEFT") end
+                end,
+            },
+            resetBellTopRight = {
+                order = 4,
+                type = "execute",
+                name = "Reset to Top Right",
+                desc = "Snap the bell back to the top-right corner.",
+                width = "half",
+                func = function()
+                    if addon.ResetBellPosition then addon.ResetBellPosition("TOPRIGHT") end
                 end,
             },
             displayHeader = {

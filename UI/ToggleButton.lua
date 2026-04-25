@@ -189,12 +189,20 @@ function addon.GetToggleButton()
     return button
 end
 
--- Public: clear the saved bell position and snap back to the default
--- TOPLEFT corner. Called from the options page "Reset Bell Position".
-function addon.ResetBellPosition()
+-- Public: snap the bell back to a screen corner. Called from the
+-- options page "Reset to Top Left" / "Reset to Top Right" buttons.
+-- Pass a corner key like "TOPLEFT" or "TOPRIGHT". We clear the
+-- saved bellAnchor *and* set db.position so ApplyButtonPosition
+-- uses the requested corner rather than the previously derived one.
+function addon.ResetBellPosition(corner)
     if not addon.db then return end
+    corner = corner or "TOPLEFT"
     addon.db.bellAnchor = nil
+    addon.db.position = corner
     ApplyButtonPosition()
+    -- Notify panel/toast listeners even if RecomputeDerivedPosition
+    -- inside ApplyButtonPosition didn't fire (corner unchanged case).
+    addon.Events:Trigger("SETTING_CHANGED_position", corner)
 end
 
 -- Event listeners
