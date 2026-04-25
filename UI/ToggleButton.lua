@@ -170,6 +170,16 @@ local function RegisterWithEditMode()
             end
             RecomputeDerivedPosition()
         end,
+        -- Active toasts anchor to the bell at fixed offsets — they
+        -- don't follow the bell while it's being dragged, which
+        -- looks awkward (toast stays put, bell flies away). Dismiss
+        -- them on Edit Mode entry so the user only sees the bell
+        -- being repositioned.
+        onEnter = function()
+            if addon.DismissAllToasts then
+                addon.DismissAllToasts()
+            end
+        end,
     })
 
     button._editModeRegistered = true
