@@ -24,6 +24,29 @@ function addon.CreateScrollContainer(parent, width, height)
         maxOffset = 0,
     }
 
+    -- Smooth-scroll OnUpdate. Previously this ran every frame even when
+    -- the scroll was settled, calling SetPoint on the content frame
+    -- every tick. Now it only runs while actively lerping toward the
+    -- target offset and unhooks itself once we're within 0.5 px.
+    -- ScrollTo / SetContentHeight re-arm it when the target changes.
+    local function Tick(self, elapsed)
+        if math.abs(scroll.offset - scroll.targetOffset) < 0.5 then
+            scroll.offset = scroll.targetOffset
+            content:SetPoint("TOPLEFT", clipFrame, "TOPLEFT", 0, scroll.offset)
+            self:SetScript("OnUpdate", nil)  -- settled - stop ticking
+        else
+            scroll.offset = scroll.offset
+                + (scroll.targetOffset - scroll.offset) * math.min(1, elapsed * LERP_SPEED)
+            content:SetPoint("TOPLEFT", clipFrame, "TOPLEFT", 0, scroll.offset)
+        end
+    end
+
+    local function Arm()
+        if scroll.offset ~= scroll.targetOffset then
+            clipFrame:SetScript("OnUpdate", Tick)
+        end
+    end
+
     function scroll:UpdateMaxOffset()
         local contentHeight = self.content:GetHeight()
         local viewHeight = self.clipFrame:GetHeight()
@@ -31,15 +54,18 @@ function addon.CreateScrollContainer(parent, width, height)
         -- Clamp current offset
         if self.targetOffset > self.maxOffset then
             self.targetOffset = self.maxOffset
+            Arm()
         end
     end
 
     function scroll:ScrollTo(offset)
         self.targetOffset = math.max(0, math.min(offset, self.maxOffset))
+        Arm()
     end
 
     function scroll:ScrollToTop()
         self.targetOffset = 0
+        Arm()
     end
 
     function scroll:SetContentHeight(height)
@@ -51,21 +77,6 @@ function addon.CreateScrollContainer(parent, width, height)
     clipFrame:EnableMouseWheel(true)
     clipFrame:SetScript("OnMouseWheel", function(self, delta)
         scroll:ScrollTo(scroll.targetOffset - delta * SCROLL_SPEED)
-    end)
-
-    -- Smooth scroll via OnUpdate
-    local isScrolling = false
-    clipFrame:SetScript("OnUpdate", function(self, elapsed)
-        if math.abs(scroll.offset - scroll.targetOffset) < 0.5 then
-            scroll.offset = scroll.targetOffset
-            if isScrolling then
-                isScrolling = false
-            end
-        else
-            scroll.offset = scroll.offset + (scroll.targetOffset - scroll.offset) * math.min(1, elapsed * LERP_SPEED)
-            isScrolling = true
-        end
-        content:SetPoint("TOPLEFT", clipFrame, "TOPLEFT", 0, scroll.offset)
     end)
 
     return scroll

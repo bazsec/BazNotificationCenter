@@ -26,6 +26,17 @@ local BACKDROP_INPUT = {
     insets = { left = 4, right = 4, top = 2, bottom = 2 },
 }
 
+-- Reused across every history card. Previously a fresh dict was
+-- allocated on every CreateHistoryCard AND every ResetHistoryCard
+-- call; with a busy history this was several hundred wasted tables
+-- per session.
+local BACKDROP_HISTORY_CARD = {
+    bgFile = "Interface\\Buttons\\WHITE8x8",
+    edgeFile = "Interface\\Buttons\\WHITE8x8",
+    edgeSize = 1,
+    insets = { left = 1, right = 1, top = 1, bottom = 1 },
+}
+
 -- State
 local panel
 local overlay
@@ -54,12 +65,7 @@ local function CreateHistoryCard()
     historyCardIndex = historyCardIndex + 1
     local card = CreateFrame("Frame", "BNCHistCard" .. historyCardIndex, UIParent, "BackdropTemplate")
     card:SetSize(CONTENT_WIDTH, 48)
-    card:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 },
-    })
+    card:SetBackdrop(BACKDROP_HISTORY_CARD)
     card:SetBackdropColor(unpack(Colors.cardBg))
     card:SetBackdropBorderColor(unpack(Colors.cardBorder))
     card:EnableMouse(true)
@@ -116,12 +122,11 @@ local function ResetHistoryCard(card)
     card:ClearAllPoints()
     card.priorityBar:Hide()
     card.isSeparator = false
-    card:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 },
-    })
+    -- The card already has the backdrop applied from creation - just
+    -- restore the colours, which are the only thing that ever changes
+    -- (separator rows tint differently). Re-applying SetBackdrop on
+    -- every release was rebuilding the 9-slice frame structure for no
+    -- reason.
     card:SetBackdropColor(unpack(Colors.cardBg))
     card:SetBackdropBorderColor(unpack(Colors.cardBorder))
 end
@@ -1031,18 +1036,30 @@ addon.Events:Register("CORE_LOADED", function()
     ReanchorPanel()
 end)
 
-addon.Events:Register("NOTIFICATION_ADDED", function()
-    if isShown and currentTab == "notifications" then PopulateNotifications() end
-end)
-addon.Events:Register("NOTIFICATION_UPDATED", function()
-    if isShown and currentTab == "notifications" then PopulateNotifications() end
-end)
-addon.Events:Register("NOTIFICATION_DISMISSED", function()
-    if isShown and currentTab == "notifications" then PopulateNotifications() end
-end)
-addon.Events:Register("NOTIFICATIONS_CLEARED", function()
-    if isShown and currentTab == "notifications" then PopulateNotifications() end
-end)
+-- Debounced repopulate. Burst events (looting trash, multi-quest
+-- turn-ins, achievement chains) used to call PopulateNotifications
+-- once per event - and PopulateNotifications releases every active
+-- card back to the pool then re-acquires + re-anchors them all. With
+-- 5 events firing in the same frame and 30 cards visible, that's
+-- 150 SetPoint/SetParent calls when only 5 are needed. Coalesce into
+-- one render at the end of the frame batch.
+local pendingPopulate = false
+local function SchedulePopulate()
+    if pendingPopulate then return end
+    if not (isShown and currentTab == "notifications") then return end
+    pendingPopulate = true
+    C_Timer.After(0, function()
+        pendingPopulate = false
+        if isShown and currentTab == "notifications" then
+            PopulateNotifications()
+        end
+    end)
+end
+
+addon.Events:Register("NOTIFICATION_ADDED",     SchedulePopulate)
+addon.Events:Register("NOTIFICATION_UPDATED",   SchedulePopulate)
+addon.Events:Register("NOTIFICATION_DISMISSED", SchedulePopulate)
+addon.Events:Register("NOTIFICATIONS_CLEARED",  SchedulePopulate)
 addon.Events:Register("HISTORY_CLEARED", function()
     if isShown and currentTab == "history" then
         RunHistorySearch()

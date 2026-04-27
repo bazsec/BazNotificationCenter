@@ -83,55 +83,33 @@ local function OnLootReceived(event, msg, playerName, languageName, channelName,
 
     local quantity = tonumber(BNC.SafeMatch(msg, "x(%d+)%s*$")) or tonumber(BNC.SafeMatch(msg, "x(%d+)")) or 1
 
-    local itemName, _, itemQuality, _, _, _, _, _, _, itemTexture
+    -- Look up item details. The previous code wrapped each GetItemInfo
+    -- call in pcall + a table-build for the multi-return values, doing
+    -- this up to 4 times in a fallback chain. AOE loot bursts (5-10
+    -- items per kill) made this expensive enough to feel as a hitch.
+    -- Direct multi-value returns avoid the per-event table allocations,
+    -- and GetItemInfoInstant is non-blocking so it's safe as a fallback
+    -- (it doesn't trigger server roundtrips like GetItemInfo can).
+    local itemName, _, itemQuality, _, _, _, _, _, _, itemTexture = GetItemInfo(itemLink)
 
-    local ok, result = pcall(function()
-        return {C_Item.GetItemInfo(itemLink)}
-    end)
-    if ok and result and result[1] then
-        itemName = result[1]
-        itemQuality = result[3]
-        itemTexture = result[10]
-    end
-
+    local instantClassID
     if not itemName then
-        ok, result = pcall(function()
-            return {GetItemInfo(itemLink)}
-        end)
-        if ok and result and result[1] then
-            itemName = result[1]
-            itemQuality = result[3]
-            itemTexture = result[10]
-        end
+        local instName, _, instQuality, _, instTexture, instClassID = GetItemInfoInstant(itemLink)
+        instantClassID = instClassID
+        itemName    = instName or BNC.SafeMatch(itemLink, "%[(.-)%]") or "Unknown Item"
+        itemQuality = instQuality or 0
+        itemTexture = instTexture or "Interface\\Icons\\INV_Misc_QuestionMark"
     end
 
-    if not itemName then
-        local itemID = BNC.SafeMatch(itemLink, "item:(%d+)")
-        if itemID then
-            ok, result = pcall(function()
-                return {C_Item.GetItemInfoInstant(tonumber(itemID))}
-            end)
-            if ok and result and result[1] then
-                itemName = result[2] or BNC.SafeMatch(itemLink, "%[(.-)%]") or "Unknown Item"
-                itemQuality = result[3] or 0
-                itemTexture = result[5] or "Interface\\Icons\\INV_Misc_QuestionMark"
-            end
-        end
-    end
-
-    if not itemName then
-        itemName = BNC.SafeMatch(itemLink, "%[(.-)%]") or "Unknown Item"
-        itemQuality = 0
-        itemTexture = "Interface\\Icons\\INV_Misc_QuestionMark"
-    end
-
-    -- Skip quest items if BNC-Quests is handling them
+    -- Skip quest items if BNC-Quests is handling them. Reuse the
+    -- classID we already fetched above when possible to avoid a
+    -- second GetItemInfoInstant call.
     if GetSetting("hideQuestItems") ~= false and BNC:IsModuleEnabled("quests") then
-        local itemID = BNC.SafeMatch(itemLink, "item:(%d+)")
-        if itemID then
-            local classID = select(6, C_Item.GetItemInfoInstant(tonumber(itemID)))
-            if classID == 12 then return end  -- Enum.ItemClass.Questitem = 12
+        local classID = instantClassID
+        if classID == nil then
+            classID = select(6, GetItemInfoInstant(itemLink))
         end
+        if classID == 12 then return end  -- Enum.ItemClass.Questitem = 12
     end
 
     if itemQuality < GetMinQuality() then return end
