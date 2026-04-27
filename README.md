@@ -87,10 +87,10 @@ Plus extensibility via BazCore's notification bridge — any addon can call `Baz
 ## Compatibility
 
 *   **WoW Version:** Retail 12.0 (Midnight)
-*   **Midnight API Safe:** Taint-safe event handling
-*   **Edit Mode:** Bell registers with BazCore Edit Mode
-*   **Addon Compartment:** Toggle entry registered automatically
-*   **BazLootNotifier:** Smart per-category handoff
+*   **Taint-safe** — read-only event handling, no protected frame mutations
+*   **Edit Mode:** Bell can be moved via Blizzard's native Edit Mode
+*   **Addon Compartment:** Bell entry registered automatically
+*   **BazLootNotifier:** Smart per-category handoff so you never see duplicate popups
 
 ***
 
