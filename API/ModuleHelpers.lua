@@ -107,7 +107,7 @@ function BNC:OnChatMessage(event, patternOrList, handler)
             end
         end)
     elseif type(patternOrList) == "table" then
-        -- Array of { pattern, handler } entries — tries each in order
+        -- Array of { pattern, handler } entries - tries each in order
         return BNC:Listen(event, function(evt, msg, ...)
             if not msg then return end
             for _, entry in ipairs(patternOrList) do

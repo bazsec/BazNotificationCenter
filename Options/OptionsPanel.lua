@@ -19,7 +19,7 @@ local function GetMainOptionsTable()
         features = "Toast popups with priority-based sounds and auto-dismiss. " ..
             "Notification panel with grouping, history, and search. " ..
             "Do Not Disturb mode (manual or auto in combat/encounters). " ..
-            "Open plugin API — any addon can create notification modules.",
+            "Open plugin API - any addon can create notification modules.",
         guide = {
             { "Bell Icon", "Left-click to open the panel. Right-click to clear all" },
             { "Toasts", "Brief popups appear for new events and auto-dismiss" },
@@ -164,7 +164,7 @@ local function GetSettingsOptionsTable()
                 order = 20.5,
                 type = "note",
                 style = "tip",
-                text = "DND mode silences toast popups and sounds without losing notifications — they still appear in the history panel for review.",
+                text = "DND mode silences toast popups and sounds without losing notifications - they still appear in the history panel for review.",
             },
             dndEnabled = {
                 order = 21,
@@ -221,7 +221,7 @@ local function GetSettingsOptionsTable()
 end
 
 ---------------------------------------------------------------------------
--- Modules Subcategory — list/detail panel
+-- Modules Subcategory - list/detail panel
 -- One unified page with a list of modules on the left and the selected
 -- module's enable toggle + settings on the right. Same shape BWD's
 -- Drawers / Widgets sub-categories use.
@@ -379,7 +379,7 @@ end
 -- Per-Module Settings Subcategory
 ---------------------------------------------------------------------------
 
--- Per-module sub-categories are no longer separate sidebar entries —
+-- Per-module sub-categories are no longer separate sidebar entries -
 -- everything lives inside the unified Modules list/detail page now.
 -- This stub stays so the "create on module register" event chain still
 -- has something to call; it just refreshes the Modules page.
@@ -406,7 +406,7 @@ end
 local optionsReady = false
 
 addon.Events:Register("CORE_LOADED", function()
-    -- Main page (user manual) — must be first so parent category exists
+    -- Main page (user manual) - must be first so parent category exists
     BazCore:RegisterOptionsTable("BazNotificationCenter", GetMainOptionsTable)
     BazCore:AddToSettings("BazNotificationCenter", "BazNotificationCenter")
 

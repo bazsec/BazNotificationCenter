@@ -43,7 +43,7 @@ function addon.CreateNotificationBody(frame)
     frame.icon:SetPoint("TOPLEFT", frame, "TOPLEFT", BODY_PADDING, -BODY_PADDING)
     frame.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
-    -- Module label (bottom-right corner — identifies source addon on toasts
+    -- Module label (bottom-right corner - identifies source addon on toasts
     -- without displacing the title. Hidden on cards since the GroupHeader
     -- already shows the module name above them.)
     frame.moduleLabel = frame:CreateFontString(nil, "OVERLAY")
@@ -53,7 +53,7 @@ function addon.CreateNotificationBody(frame)
     frame.moduleLabel:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -BODY_PADDING, BODY_PADDING)
     frame.moduleLabel:Hide()
 
-    -- Title — always anchored to the top-right of the icon
+    -- Title - always anchored to the top-right of the icon
     frame.title = frame:CreateFontString(nil, "OVERLAY")
     frame.title:SetFontObject(GameFontNormal)
     frame.title:SetTextColor(unpack(Colors.textPrimary))
@@ -85,8 +85,8 @@ end
 --
 -- Fills a card/toast body with data from a notification and returns the
 -- calculated total height. Options:
---   opts.showModuleLabel      — show addon-name row above title (toasts)
---   opts.rightReservedWidth   — pixels to reserve on the right of the top
+--   opts.showModuleLabel      - show addon-name row above title (toasts)
+--   opts.rightReservedWidth   - pixels to reserve on the right of the top
 --                               row (e.g. for a card's timestamp column)
 ---------------------------------------------------------------------------
 

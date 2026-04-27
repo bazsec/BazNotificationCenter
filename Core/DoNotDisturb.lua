@@ -5,7 +5,7 @@
 ---------------------------------------------------------------------------
 local addonName, addon = ...
 
--- Runtime DND state (not saved — auto-DND resets on combat/instance end)
+-- Runtime DND state (not saved - auto-DND resets on combat/instance end)
 addon.dndActive = false
 
 --- Check whether DND is currently in effect (manual toggle OR auto-triggered).

@@ -57,7 +57,7 @@ end
 -- (TOPLEFT/TOPRIGHT/BOTTOMLEFT/BOTTOMRIGHT) that best matches the
 -- frame's screen position. Used to pick a sensible toast growth and
 -- panel anchor direction once the user moves the bell freely via
--- Edit Mode — we still want toasts to stack toward screen-center
+-- Edit Mode - we still want toasts to stack toward screen-center
 -- and the panel to fall on the inside of the bell rather than off
 -- the screen edge.
 function addon.DerivePositionForFrame(frame)

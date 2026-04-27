@@ -114,8 +114,8 @@ end
 -- always anchors to the bell, and toast/panel growth direction comes
 -- from a derived corner (which screen quadrant the bell sits in).
 --
--- - bellAnchor saved → restore that absolute position on load.
--- - bellAnchor nil   → fall back to the default TOPLEFT margin.
+-- - bellAnchor saved > restore that absolute position on load.
+-- - bellAnchor nil   > fall back to the default TOPLEFT margin.
 --
 -- After any (re)anchor, the derived position is recomputed so toasts
 -- and the panel slide/grow toward screen-center rather than off-edge.
@@ -170,7 +170,7 @@ local function RegisterWithEditMode()
             end
             RecomputeDerivedPosition()
         end,
-        -- Active toasts anchor to the bell at fixed offsets — they
+        -- Active toasts anchor to the bell at fixed offsets - they
         -- don't follow the bell while it's being dragged, which
         -- looks awkward (toast stays put, bell flies away). Dismiss
         -- them on Edit Mode entry so the user only sees the bell

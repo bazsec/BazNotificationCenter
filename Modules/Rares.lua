@@ -42,7 +42,7 @@ local function OnVignetteAdded(event, vignetteGUID)
 
     -- Whitelist the vignette categories we care about. Anything else
     -- (mission NPCs, vendors, quest markers, minor vignettes, etc.) is
-    -- silently dropped — otherwise every weird vignette in Silvermoon
+    -- silently dropped - otherwise every weird vignette in Silvermoon
     -- shows up as a "Rare Spawn".
     local isEvent    = string.find(atlas, "vignetteevent", 1, true) ~= nil
     local isTreasure = string.find(atlas, "vignetteloot",  1, true) ~= nil

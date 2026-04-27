@@ -35,13 +35,13 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                 { type = "h3", text = "Stacking" },
                 { type = "paragraph", text = "Multiple toasts queue up without overlapping. Newer ones push older ones along until they expire." },
                 { type = "h3", text = "Per-module toggles" },
-                { type = "paragraph", text = "Each notification source has its own toggle. Disable just the noisy ones — keep the rest." },
+                { type = "paragraph", text = "Each notification source has its own toggle. Disable just the noisy ones - keep the rest." },
                 { type = "h3", text = "Customization" },
                 { type = "list", items = {
-                    "|cffffd700Duration|r — how long each toast stays on screen",
-                    "|cffffd700Position|r — which edge of the screen toasts appear from",
-                    "|cffffd700Stack direction|r — newer on top or newer at bottom",
-                    "|cffffd700Width|r — toast width in pixels",
+                    "|cffffd700Duration|r - how long each toast stays on screen",
+                    "|cffffd700Position|r - which edge of the screen toasts appear from",
+                    "|cffffd700Stack direction|r - newer on top or newer at bottom",
+                    "|cffffd700Width|r - toast width in pixels",
                 }},
             },
         },
@@ -61,8 +61,8 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                 { type = "table",
                   columns = { "Setting", "Range", "Default" },
                   rows = {
-                      { "Retention",    "1–90 days", "7 days" },
-                      { "Max items",    "100–10000", "2000" },
+                      { "Retention",    "1-90 days", "7 days" },
+                      { "Max items",    "100-10000", "2000" },
                   },
                 },
             },
@@ -70,7 +70,7 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
         {
             title = "Modules",
             blocks = {
-                { type = "lead", text = "BNC ships with 20 modules covering most major game events. Each can be toggled independently in Settings → BazNotificationCenter → Modules." },
+                { type = "lead", text = "BNC ships with 20 modules covering most major game events. Each can be toggled independently in Settings > BazNotificationCenter > Modules." },
                 { type = "collapsible", title = "Loot", style = "h4", blocks = {
                     { type = "paragraph", text = "Item drops with rarity colors and counts. Filter by minimum rarity (white, green, blue, ...)." },
                 }},
@@ -90,13 +90,13 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                     { type = "paragraph", text = "Crafting completions with item icon and rarity." },
                 }},
                 { type = "collapsible", title = "Keystone", style = "h4", blocks = {
-                    { type = "paragraph", text = "Mythic+ events — dungeon completions, key upgrades and downgrades, depletion warnings." },
+                    { type = "paragraph", text = "Mythic+ events - dungeon completions, key upgrades and downgrades, depletion warnings." },
                 }},
                 { type = "collapsible", title = "Vault", style = "h4", blocks = {
-                    { type = "paragraph", text = "Great Vault — weekly chest unlock and reward-selection notifications." },
+                    { type = "paragraph", text = "Great Vault - weekly chest unlock and reward-selection notifications." },
                 }},
                 { type = "collapsible", title = "Group", style = "h4", blocks = {
-                    { type = "paragraph", text = "LFG / LFR / Premade-group events — queue popped, role check, ready check, role assignment." },
+                    { type = "paragraph", text = "LFG / LFR / Premade-group events - queue popped, role check, ready check, role assignment." },
                 }},
                 { type = "collapsible", title = "Rares", style = "h4", blocks = {
                     { type = "paragraph", text = "Rare-spawn vignette detection with atlas-based filtering: kills, loot, events, bosses." },
@@ -111,7 +111,7 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                     { type = "paragraph", text = "Incoming mail, returned mail, and mail-attachment notifications." },
                 }},
                 { type = "collapsible", title = "Auction", style = "h4", blocks = {
-                    { type = "paragraph", text = "Auction house events — successful sales, expirations, and outbids." },
+                    { type = "paragraph", text = "Auction house events - successful sales, expirations, and outbids." },
                 }},
                 { type = "collapsible", title = "Inventory", style = "h4", blocks = {
                     { type = "paragraph", text = "Bag-space warnings, currency captures, and notable inventory transitions." },
@@ -123,13 +123,13 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                     { type = "paragraph", text = "Toy, mount, and pet collection additions." },
                 }},
                 { type = "collapsible", title = "Social", style = "h4", blocks = {
-                    { type = "paragraph", text = "Guildmates and friends — online/offline, level-ups, achievements, BNet status." },
+                    { type = "paragraph", text = "Guildmates and friends - online/offline, level-ups, achievements, BNet status." },
                 }},
                 { type = "collapsible", title = "TalkingHead", style = "h4", blocks = {
                     { type = "paragraph", text = "NPC talking-head dialogue captured to history so you don't miss the lore." },
                 }},
                 { type = "collapsible", title = "System", style = "h4", blocks = {
-                    { type = "paragraph", text = "Important system messages — disconnects, reconnect attempts, and error notifications." },
+                    { type = "paragraph", text = "Important system messages - disconnects, reconnect attempts, and error notifications." },
                 }},
             },
         },
@@ -139,7 +139,7 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                 { type = "lead", text = "BNC plays well with the rest of the suite." },
                 { type = "h3", text = "BazLootNotifier" },
                 { type = "paragraph", text = "When BNC is installed, BazLootNotifier silently defers matching categories to BNC. No duplicate notifications." },
-                { type = "note", style = "info", text = "You can mix and match per-category — keep BLN's Loot popups but route everything else through BNC's toasts." },
+                { type = "note", style = "info", text = "You can mix and match per-category - keep BLN's Loot popups but route everything else through BNC's toasts." },
                 { type = "h3", text = "Custom sources" },
                 { type = "paragraph", text = "Any addon can call BNC's push API to surface its own events:" },
                 { type = "code", text = "BazCore:PushNotification({\n    module  = \"MyAddon\",\n    title   = \"Something happened\",\n    body    = \"Detail text here\",\n    icon    = \"Interface\\\\Icons\\\\INV_Misc_Bell_01\",\n    rarity  = 4,\n})" },

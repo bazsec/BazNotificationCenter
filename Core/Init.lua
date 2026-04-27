@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- BazNotificationCenter
 -- A modern notification center for World of Warcraft
--- Part of the Baz Suite — powered by BazCore
+-- Part of the Baz Suite - powered by BazCore
 ---------------------------------------------------------------------------
 local addonName, addon = ...
 
@@ -30,7 +30,7 @@ end
 ---------------------------------------------------------------------------
 
 local DEFAULTS = {
-    -- Derived corner — recomputed automatically from the bell's actual
+    -- Derived corner - recomputed automatically from the bell's actual
     -- screen position. Stored so the rest of the addon (toast growth,
     -- panel anchor side, header layout) can read a single value.
     -- Users no longer pick this directly; they drag the bell in
@@ -127,7 +127,7 @@ BazCore:RegisterAddon("BazNotificationCenter", {
     },
 
     onLoad = function(self)
-        -- History is global (not per-profile) — stored in BazNotificationCenterDB directly
+        -- History is global (not per-profile) - stored in BazNotificationCenterDB directly
         local sv = _G["BazNotificationCenterDB"] or {}
         _G["BazNotificationCenterDB"] = sv
         if not sv.history then
