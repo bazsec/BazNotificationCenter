@@ -70,9 +70,9 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
         {
             title = "Modules",
             blocks = {
-                { type = "lead", text = "BNC ships with modules for a wide range of game events. Each can be toggled independently." },
+                { type = "lead", text = "BNC ships with 20 modules covering most major game events. Each can be toggled independently in Settings → BazNotificationCenter → Modules." },
                 { type = "collapsible", title = "Loot", style = "h4", blocks = {
-                    { type = "paragraph", text = "Item drops with rarity colors and counts. Filter by minimum rarity (white, green, blue, …)." },
+                    { type = "paragraph", text = "Item drops with rarity colors and counts. Filter by minimum rarity (white, green, blue, ...)." },
                 }},
                 { type = "collapsible", title = "Reputation", style = "h4", blocks = {
                     { type = "paragraph", text = "Faction standing changes. Optional filter for major factions only." },
@@ -80,23 +80,56 @@ BazCore:RegisterUserGuide("BazNotificationCenter", {
                 { type = "collapsible", title = "XP", style = "h4", blocks = {
                     { type = "paragraph", text = "Experience gains. Suppressed at max level automatically." },
                 }},
-                { type = "collapsible", title = "Currency", style = "h4", blocks = {
-                    { type = "paragraph", text = "Currency gains and losses. Per-currency on/off." },
-                }},
                 { type = "collapsible", title = "Achievements", style = "h4", blocks = {
                     { type = "paragraph", text = "Achievement completions for you and (optionally) party/raid members." },
                 }},
-                { type = "collapsible", title = "Rare Spawns", style = "h4", blocks = {
-                    { type = "paragraph", text = "Vignette detection with atlas-based filtering: kills, loot, events, bosses." },
-                }},
-                { type = "collapsible", title = "Guild", style = "h4", blocks = {
-                    { type = "paragraph", text = "Guild member activity (online/offline, achievements, level-ups)." },
-                }},
-                { type = "collapsible", title = "Queue", style = "h4", blocks = {
-                    { type = "paragraph", text = "LFG queue events — group found, queue popped, role check started." },
+                { type = "collapsible", title = "Quests", style = "h4", blocks = {
+                    { type = "paragraph", text = "Quest accept, complete, and turn-in events with quest icon and rewards." },
                 }},
                 { type = "collapsible", title = "Professions", style = "h4", blocks = {
                     { type = "paragraph", text = "Crafting completions with item icon and rarity." },
+                }},
+                { type = "collapsible", title = "Keystone", style = "h4", blocks = {
+                    { type = "paragraph", text = "Mythic+ events — dungeon completions, key upgrades and downgrades, depletion warnings." },
+                }},
+                { type = "collapsible", title = "Vault", style = "h4", blocks = {
+                    { type = "paragraph", text = "Great Vault — weekly chest unlock and reward-selection notifications." },
+                }},
+                { type = "collapsible", title = "Group", style = "h4", blocks = {
+                    { type = "paragraph", text = "LFG / LFR / Premade-group events — queue popped, role check, ready check, role assignment." },
+                }},
+                { type = "collapsible", title = "Rares", style = "h4", blocks = {
+                    { type = "paragraph", text = "Rare-spawn vignette detection with atlas-based filtering: kills, loot, events, bosses." },
+                }},
+                { type = "collapsible", title = "Instance", style = "h4", blocks = {
+                    { type = "paragraph", text = "Dungeon and raid entries, exits, and saved-instance lockouts." },
+                }},
+                { type = "collapsible", title = "Zones", style = "h4", blocks = {
+                    { type = "paragraph", text = "Zone and sub-zone enters, contested / sanctuary / friendly / hostile status changes." },
+                }},
+                { type = "collapsible", title = "Mail", style = "h4", blocks = {
+                    { type = "paragraph", text = "Incoming mail, returned mail, and mail-attachment notifications." },
+                }},
+                { type = "collapsible", title = "Auction", style = "h4", blocks = {
+                    { type = "paragraph", text = "Auction house events — successful sales, expirations, and outbids." },
+                }},
+                { type = "collapsible", title = "Inventory", style = "h4", blocks = {
+                    { type = "paragraph", text = "Bag-space warnings, currency captures, and notable inventory transitions." },
+                }},
+                { type = "collapsible", title = "Calendar", style = "h4", blocks = {
+                    { type = "paragraph", text = "Calendar invites and event reminders." },
+                }},
+                { type = "collapsible", title = "Collections", style = "h4", blocks = {
+                    { type = "paragraph", text = "Toy, mount, and pet collection additions." },
+                }},
+                { type = "collapsible", title = "Social", style = "h4", blocks = {
+                    { type = "paragraph", text = "Guildmates and friends — online/offline, level-ups, achievements, BNet status." },
+                }},
+                { type = "collapsible", title = "TalkingHead", style = "h4", blocks = {
+                    { type = "paragraph", text = "NPC talking-head dialogue captured to history so you don't miss the lore." },
+                }},
+                { type = "collapsible", title = "System", style = "h4", blocks = {
+                    { type = "paragraph", text = "Important system messages — disconnects, reconnect attempts, and error notifications." },
                 }},
             },
         },

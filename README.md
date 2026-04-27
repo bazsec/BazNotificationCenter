@@ -34,17 +34,30 @@ BazNotificationCenter monitors dozens of game events - loot drops, reputation ga
 
 ### Notification Modules
 
-BNC ships with modules for a wide range of game events:
+BNC ships with 20 built-in modules. Each can be toggled independently in the Modules sub-page:
 
-*   **Loot** — item drops with rarity colors
+*   **Loot** — item drops with rarity colors and counts
 *   **Reputation** — faction standing changes
-*   **XP** — experience gains
-*   **Currency** — currency gains and losses
-*   **Achievements** — achievement completions
-*   **Rare Spawns** — vignette detection with atlas-based filtering (kills, loot, events, bosses)
-*   **Guild** — guild member activity
-*   **Professions** — crafting completions
-*   **And more** — extensible via BazCore's notification bridge
+*   **XP** — experience gains (auto-suppressed at max level)
+*   **Achievements** — achievement completions for you and (optionally) party/raid members
+*   **Quests** — quest accept, complete, and turn-in events
+*   **Professions** — crafting completions with item icon and rarity
+*   **Keystone** — Mythic+ events: completions, key upgrades, depletion
+*   **Vault** — Great Vault weekly chest unlock + rewards
+*   **Group** — LFG / LFR / Premade-group queue and role-check events
+*   **Rares** — rare-spawn vignettes with atlas-based filtering (kills, loot, events, bosses)
+*   **Instance** — dungeon/raid entries, exits, and saved-instance lockouts
+*   **Zones** — zone enters, sub-zone changes, contested/sanctuary status
+*   **Mail** — incoming mail, returned mail, attachments
+*   **Auction** — auction house sales, expirations, outbids
+*   **Inventory** — bag-space warnings and notable inventory events
+*   **Calendar** — calendar invites and event reminders
+*   **Collections** — toy / mount / pet additions
+*   **Social** — guildmates and friends online/offline, level-ups, BNet status
+*   **TalkingHead** — NPC talking-head dialogue captured to history
+*   **System** — important system messages (disconnects, errors)
+
+Plus extensibility via BazCore's notification bridge — any addon can call `BazCore:PushNotification()` to surface its own events.
 
 ### Smart Handoff
 
@@ -58,6 +71,16 @@ BNC ships with modules for a wide range of game events:
 *   History retention period
 *   Module-level configuration
 *   Reset bell position to top-left or top-right corner
+
+***
+
+## Slash Commands
+
+| Command | Description |
+| --- | --- |
+| `/bnc` | Open settings panel |
+| `/bnc panel` | Open the notification history panel |
+| `/bnc clear` | Clear all notification history (asks for confirmation) |
 
 ***
 
