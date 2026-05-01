@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Professions: Craft completions and skill level-up notifications.
 -- Events: PLAYER_ENTERING_WORLD, SKILL_LINES_CHANGED, CHAT_MSG_LOOT,

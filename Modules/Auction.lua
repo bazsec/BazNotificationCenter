@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Auction: Notifications for auction house sold, expired, outbid, won.
 -- Events: CHAT_MSG_SYSTEM, AUCTION_HOUSE_AUCTION_CREATED, AUCTION_HOUSE_SHOW

@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Achievements: Achievement earned, criteria, tracked progress, and guild notifications.
 -- Events: ACHIEVEMENT_EARNED, CRITERIA_EARNED, TRACKED_ACHIEVEMENT_UPDATE, GUILD_ACHIEVEMENT_EARNED

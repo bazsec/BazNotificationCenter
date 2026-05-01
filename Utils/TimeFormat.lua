@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 local addonName, addon = ...
 
 -- Relative time from GetTime() (session-based)

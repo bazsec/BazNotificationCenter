@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Inventory: Bag space and equipment durability warnings with repair detection.
 -- Events: PLAYER_ENTERING_WORLD, BAG_UPDATE, UPDATE_INVENTORY_DURABILITY, MERCHANT_SHOW

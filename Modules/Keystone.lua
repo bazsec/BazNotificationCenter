@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Keystone: Mythic+ keystone info, affixes, best runs, and completion notifications.
 -- Events: CHALLENGE_MODE_COMPLETED, CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN, ITEM_CHANGED

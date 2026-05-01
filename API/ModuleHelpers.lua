@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- ModuleHelpers: Convenience APIs for module developers.
 -- Provides BNC:Listen(), BNC:OnChatMessage(), and the notification builder.

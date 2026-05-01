@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Collections: Alerts for new mounts, pets, toys, and transmog appearances.
 -- Events: NEW_MOUNT_ADDED, NEW_PET_ADDED, NEW_TOY_ADDED, TRANSMOG_COLLECTION_SOURCE_ADDED

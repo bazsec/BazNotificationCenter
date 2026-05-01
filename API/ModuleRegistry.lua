@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 local addonName, addon = ...
 
 -- Store module option definitions for the options panel

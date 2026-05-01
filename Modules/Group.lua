@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Group: Group roster changes, queue pops, role checks, and pull timers.
 -- Events: GROUP_ROSTER_UPDATE, LFG_PROPOSAL_SHOW, ROLE_POLL_BEGIN, START_TIMER

@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Vault: Great Vault weekly progress tracking and login summary.
 -- Events: WEEKLY_REWARDS_UPDATE, PLAYER_ENTERING_WORLD

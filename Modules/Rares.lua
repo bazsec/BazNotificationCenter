@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Rares: Alerts for rare spawns, treasures, and events via vignettes.
 -- Events: VIGNETTE_MINIMAP_UPDATED, VIGNETTES_UPDATED

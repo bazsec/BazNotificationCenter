@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Calendar: Calendar event summaries, holiday alerts, invites, and weekly reset timer.
 -- Events: CALENDAR_UPDATE_INVITE_LIST, CALENDAR_NEW_EVENT, CALENDAR_UPDATE_EVENT_LIST

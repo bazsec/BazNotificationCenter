@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Loot: Item loot, gold gains, currency, and loot alert suppression.
 -- Events: PLAYER_ENTERING_WORLD, PLAYER_MONEY, CHAT_MSG_LOOT,

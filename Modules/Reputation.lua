@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Reputation: Reputation gains/losses, standing milestones, renown.
 -- Events: PLAYER_ENTERING_WORLD, CHAT_MSG_COMBAT_FACTION_CHANGE,

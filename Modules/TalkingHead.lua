@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-TalkingHead: Captures talking head dialogue as toast notifications.
 -- Events: TALKINGHEAD_REQUESTED, PLAYER_ENTERING_WORLD

@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 ---------------------------------------------------------------------------
 -- BazNotificationCenter: Slash Command Helpers
 -- Slash registration handled by BazCore:RegisterAddon() in Init.lua

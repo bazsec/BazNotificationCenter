@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- SafeString: Taint-safe string operations for BNC modules.
 -- WoW's taint system prevents addon code from operating on strings

@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Instance: Alerts for dungeons, raids, boss encounters, M+, and LFG.
 -- Events: PLAYER_ENTERING_WORLD, ZONE_CHANGED_NEW_AREA, ENCOUNTER_START,

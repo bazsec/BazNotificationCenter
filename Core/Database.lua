@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 ---------------------------------------------------------------------------
 -- BazNotificationCenter: Database Helpers
 -- SV lifecycle managed by BazCore:RegisterAddon() in Init.lua

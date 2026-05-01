@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 ---------------------------------------------------------------------------
 -- BazNotificationCenter: Internal CallbackRegistry
 -- Custom event system for internal addon coordination

@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-System: UI error/info messages, boss emotes, raid warnings, event toasts.
 -- Events: PLAYER_ENTERING_WORLD, RAID_BOSS_EMOTE, RAID_BOSS_WHISPER

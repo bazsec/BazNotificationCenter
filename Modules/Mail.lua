@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Mail: Alerts for new mail arrival and mailbox contents summary.
 -- Events: PLAYER_ENTERING_WORLD, UPDATE_PENDING_MAIL, MAIL_SHOW, MAIL_CLOSED

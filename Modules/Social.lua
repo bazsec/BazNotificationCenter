@@ -1,3 +1,4 @@
+-- SPDX-License-Identifier: GPL-2.0-or-later
 -- ==========================================================================
 -- BNC-Social: Whispers, friend online/offline, guild status, group events.
 -- Events: PLAYER_ENTERING_WORLD, CHAT_MSG_WHISPER, CHAT_MSG_BN_WHISPER,
