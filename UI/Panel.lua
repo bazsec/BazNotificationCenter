@@ -449,21 +449,28 @@ local function CreatePanel()
         if currentTab == "notifications" then
             BNC:DismissAll()
         else
-            StaticPopup_Show("BNC_PURGE_HISTORY")
+            -- Purging history wipes every archived notification with
+            -- no recovery. Route through the shared BazCore:Confirm
+            -- primitive so the popup matches the rest of the BazCore
+            -- UI (same fonts, buttons, backdrop) and the destructive
+            -- accept button is visually flagged red.
+            if BazCore.Confirm then
+                BazCore:Confirm({
+                    title       = "Purge history?",
+                    body        = "Delete every archived notification? This can't be undone.",
+                    acceptLabel = "Purge",
+                    acceptStyle = "destructive",
+                    onAccept    = function()
+                        BNC:ClearHistory()
+                        RunHistorySearch()
+                        if panel.PopulateHistory then
+                            panel.PopulateHistory()
+                        end
+                    end,
+                })
+            end
         end
     end)
-
-    StaticPopupDialogs["BNC_PURGE_HISTORY"] = {
-        text = "Purge all notification history?",
-        button1 = "Purge",
-        button2 = "Cancel",
-        OnAccept = function()
-            BNC:ClearHistory()
-            RunHistorySearch()
-            if panel.PopulateHistory then panel.PopulateHistory() end
-        end,
-        timeout = 0, whileDead = true, hideOnEscape = true, preferredIndex = 3,
-    }
 
     -- Header divider
     local hDiv = panel.header:CreateTexture(nil, "ARTWORK")
